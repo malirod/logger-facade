@@ -18,7 +18,7 @@ sudo apt-get install oracle-java8-installer
 Install Gradle
 
 - download [Gradle 3.0](https://services.gradle.org/distributions/gradle-3.0-bin.zip)
-- unzip to some dir, e.g. to `~/grandle-3.0`
+- unzip to some dir, e.g. to `~/gradle-3.0`
 - Add env vars to `~./profile` or `~./bashrc`
 
 ```
