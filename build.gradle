@@ -1,0 +1,26 @@
+apply plugin: "cpp"
+
+model {
+    buildTypes {
+        debug
+        release
+    }
+    components {
+        testrunner(NativeExecutableSpec) {
+            sources {
+                cpp {
+                    source {
+                        srcDir "thirdparty/gtest"
+                        srcDir "src"
+                        srcDir "test"
+                        include "**/*.cc"
+                    }
+                    exportedHeaders {
+                        srcDir "thirdparty/gtest"
+                        include "**/*.h"
+                    }
+                }
+            }
+        }
+    }
+}
