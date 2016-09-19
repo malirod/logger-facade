@@ -22,7 +22,6 @@ model {
                     }
                     exportedHeaders {
                         srcDirs += "thirdparty/gtest"
-                        include "**/*.h"
                     }
                 }
             }
