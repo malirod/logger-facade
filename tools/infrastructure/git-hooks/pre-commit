@@ -75,8 +75,8 @@ fi
 # Auto update c++ files with clang-format. Use default clang-format.
 # Use update-alternatives to set default clang.
 CLANG_FORMAT=clang-format
-# Verify clang-format. Note: 3.6 and 3.7 produce different formatting for the same config
-CLANG_FORMAT_REQUIRED_VERSION=3.6
+# Verify clang-format. Note: 3.6 and 3.7 produces different formatting for the same config
+CLANG_FORMAT_REQUIRED_VERSION=3.
 CLANG_FORMAT_CURRENT_VERSION=$($CLANG_FORMAT -version)
 if [[ $CLANG_FORMAT_CURRENT_VERSION != *$CLANG_FORMAT_REQUIRED_VERSION* ]]
 then
