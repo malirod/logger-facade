@@ -65,27 +65,181 @@ TEXT_ERROR="\\033[1;31m"
 TEXT_UNDERLINE="\\0033[4m"
 TEXT_BOLD="\\0033[1m"
 
-# check for odd whitespace
+
+##################################################################
+### Check for odd whitespace
 git diff --check --cached --color
 if [ "$?" -ne "0" ]; then
     echo -e "$TEXT_ERROR" "Your changes introduce whitespace errors" "$TEXT_DEFAULT"
     exit 1
 fi
 
+##################################################################
+### Clang-format check
+
 # Auto update c++ files with clang-format. Use default clang-format.
 # Use update-alternatives to set default clang.
-CLANG_FORMAT=clang-format
+
+# set path to clang-format binary
+CLANG_FORMAT=$(command -v clang-format)
 # Verify clang-format. Note: 3.6 and 3.7 produces different formatting for the same config
 CLANG_FORMAT_REQUIRED_VERSION=3.
 CLANG_FORMAT_CURRENT_VERSION=$($CLANG_FORMAT -version)
+
+
+# remove any older patches from previous commits. Set to true or false.
+DELETE_OLD_PATCHES=true
+
+# only parse files with the extensions in FILE_EXTS. Set to true or false.
+# if false every changed file in the commit will be parsed with clang-format.
+# if true only files matching one of the extensions are parsed with clang-format.
+PARSE_EXTS=true
+
+# file types to parse. Only effective when PARSE_EXTS is true.
+FILE_EXTS=".cc .h .cpp .hpp"
+
+# skip files which match patterns
+SKIP_FILES=("")
+
+# There should be no need to change anything below this line.
+
+if [ ! -x "$CLANG_FORMAT" ] ; then
+    echo -e "$TEXT_ERROR"
+    echo -e "Error: clang-format executable not found."
+    echo -e "Set the correct path in $(canonicalize_filename "$0")."
+    echo -e "$TEXT_DEFAULT"
+    exit 1
+fi
+
 if [[ $CLANG_FORMAT_CURRENT_VERSION != *$CLANG_FORMAT_REQUIRED_VERSION* ]]
 then
   echo -e "$TEXT_ERROR" "Wrong version of the clang-format. Required: $CLANG_FORMAT_REQUIRED_VERSION. Got: $CLANG_FORMAT_CURRENT_VERSION" "$TEXT_DEFAULT"
   exit 1
 fi
 
-# Auto-check for pep8 in python code
-PYTHON_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -e '\.py$')
+# Reference: http://stackoverflow.com/questions/1055671/how-can-i-get-the-behavior-of-gnus-readlink-f-on-a-mac
+canonicalize_filename () {
+    local target_file=$1
+    local physical_directory=""
+    local result=""
+
+    # Need to restore the working directory after work.
+    pushd `pwd` > /dev/null
+
+    cd "$(dirname "$target_file")"
+    target_file=`basename $target_file`
+
+    # Iterate down a (possible) chain of symlinks
+    while [ -L "$target_file" ]
+    do
+        target_file=$(readlink "$target_file")
+        cd "$(dirname "$target_file")"
+        target_file=$(basename "$target_file")
+    done
+
+    # Compute the canonicalized name by finding the physical path
+    # for the directory we're in and appending the target file.
+    physical_directory=`pwd -P`
+    result="$physical_directory"/"$target_file"
+
+    # restore the working directory after work.
+    popd > /dev/null
+
+    echo "$result"
+}
+
+# disable globbing for the SKIP_FILES patterns
+set -f
+
+# check whether the given file matches any of the set extensions
+matches_extension() {
+    local filename=$(basename "$1")
+    local extension=".${filename##*.}"
+    local ext
+
+    for ext in $FILE_EXTS; do [[ "$ext" == "$extension" ]] && return 0; done
+
+    return 1
+}
+
+# check whether the given file matches any of the files patters
+matches_file() {
+    for ptrn in ${SKIP_FILES[@]}; do
+        if echo $1 | grep -E '$ptrn' > /dev/null
+        # if [[ $1 =~ $ptrn ]]
+        then
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+# necessary check for initial commit
+if git rev-parse --verify HEAD >/dev/null 2>&1 ; then
+    against=HEAD
+else
+    # Initial commit: diff against an empty tree object
+    against=4b825dc642cb6eb9a060e54bf8d69288fbee4904
+fi
+
+# create a random filename to store our generated patch
+prefix="pre-commit-clang-format"
+suffix="$(date +%s)"
+patch="/tmp/$prefix-$suffix.patch"
+
+# clean up any older clang-format patches
+$DELETE_OLD_PATCHES && rm -f /tmp/$prefix*.patch
+
+# create one patch containing all changes to the files
+git diff-index --cached --diff-filter=ACMR --name-only $against -- | while read file;
+do
+    # ignore file if we do check for file extensions and the file
+    # does not match any of the extensions specified in $FILE_EXTS
+    if $PARSE_EXTS && ! matches_extension "$file"; then
+        continue;
+    fi
+
+    # ignore file matched to the skip list
+    if [ -n "$SKIP_FILES" ] && matches_file "$file"; then
+        continue;
+    fi
+
+    # clang-format our sourcefile, create a patch with diff and append it to our $patch
+    # The sed call is necessary to transform the patch from
+    #    --- $file timestamp
+    #    +++ - timestamp
+    # to both lines working on the same file and having a a/ and b/ prefix.
+    # Else it can not be applied with 'git apply'.
+    "$CLANG_FORMAT" -style=file "$file" | \
+        diff -u "$file" - | \
+        sed -e "1s|--- |--- a/|" -e "2s|+++ -|+++ b/$file|" >> "$patch"
+done
+
+# if no patch has been generated all is ok, clean up the file stub and exit
+if [ ! -s "$patch" ] ; then
+    rm -f "$patch"
+else
+    # a patch has been created, notify the user and exit
+    echo -e "$TEXT_ERROR"
+    echo -e "The following differences were found between the code to commit "
+    echo -e "and the clang-format rules:"
+    echo -e "$TEXT_INFO"
+    cat $patch
+    echo -e "$TEXT_ERROR"
+    echo -e "You can apply these changes with:"
+    echo -e "git apply $patch"
+    echo -e "(may need to be called from the root directory of your repository)"
+    echo -e "Aborting commit. Apply changes and commit again or skip checking with"
+    echo -e " --no-verify (not recommended)."
+    echo -e "$TEXT_DEFAULT"
+
+    exit 1
+fi
+
+##################################################################
+### Auto-check for pep8 in python code
+PYTHON_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -e "\.py$")
 
 if [ -n "$PYTHON_FILES" ]; then
     flake8 $PYTHON_FILES
@@ -94,3 +248,5 @@ if [ -n "$PYTHON_FILES" ]; then
         exit 2
     fi
 fi
+
+exit 0
