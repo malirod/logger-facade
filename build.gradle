@@ -1,30 +1,76 @@
 apply plugin: "cpp"
 
+def boost_home = System.getenv("BOOST_HOME")
+
 model {
-    binaries {
-      all {
-          linker.args "-lpthread"
+  toolChains {
+    clang(Clang)
+    gcc(Gcc)
+  }
+  binaries {
+    all {
+      if (buildType == buildTypes.debug) {
+        cppCompiler.args "-g"
+      }
+
+      cppCompiler.args "-Wextra"
+      cppCompiler.args "-std=c++11"
+      cppCompiler.args "-Werror"
+      cppCompiler.args "-Wpedantic"
+
+      linker.args "-lpthread"
+    }
+  }
+
+  buildTypes {
+    debug
+    release
+  }
+
+  repositories {
+    libs(PrebuiltLibraries) {
+      boost_log {
+        binaries.withType(StaticLibraryBinary) {
+          staticLibraryFile = file("${boost_home}/lib/libboost_log.a")
+        }
+      }
+      boost_thread {
+        binaries.withType(StaticLibraryBinary) {
+          staticLibraryFile = file("${boost_home}/lib/libboost_thread.a")
+        }
+      }
+      boost_system {
+        binaries.withType(StaticLibraryBinary) {
+          staticLibraryFile = file("${boost_home}/lib/libboost_system.a")
+        }
       }
     }
-    buildTypes {
-        debug
-        release
-    }
-    components {
-        testrunner(NativeExecutableSpec) {
-            sources {
-                cpp {
-                    source {
-                        srcDirs += "thirdparty/gtest"
-                        srcDirs += "src"
-                        srcDirs += "test"
-                        include "**/*.cc"
-                    }
-                    exportedHeaders {
-                        srcDirs += "thirdparty/gtest"
-                    }
-                }
-            }
+  }
+
+  components {
+    testrunner(NativeExecutableSpec) {
+      sources {
+        cpp {
+          source {
+            srcDirs =  ["thirdparty/gtest",
+                        "src",
+                        "test"
+                       ]
+            include "**/*.cc"
+          }
+          exportedHeaders {
+            srcDirs = ["thirdparty/gtest",
+                       "src",
+                       "${boost_home}/include"
+                      ]
+          }
+
+          lib library: "boost_log", linkage: "static"
+          lib library: "boost_thread", linkage: "static"
+          lib library: "boost_system", linkage: "static"
+
         }
+      }
     }
+  }
 }
