@@ -23,3 +23,7 @@ Boost logger sample
 In the project root call
 
 `./waf configure clean_release build_release clean_debug build_debug -v -j2`
+
+GCC is used by defaul. This can be changed in the folling way.
+
+`CXX=clang++ ./waf configure`
