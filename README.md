@@ -22,6 +22,4 @@ Boost logger sample
 
 In the project root call
 
-`./waf configure`
-
-`./waf build`
+`./waf configure clean_release build_release clean_debug build_debug -v -j2`
