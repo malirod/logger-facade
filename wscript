@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import os
+from waflib.Build import (BuildContext, CleanContext,
+                          InstallContext, UninstallContext)
 
 top = '.'
 out = 'build'
@@ -17,15 +19,40 @@ def configure(conf):
     boost_include_path = os.path.join(os.getenv('BOOST_HOME'), "include")
     boost_libs_path = os.path.join(os.getenv('BOOST_HOME'), "lib")
 
-    conf.load('compiler_cxx')
+    def common_setup(env):
+        env.CXXFLAGS += ['-std=c++11', '-Wextra', '-Werror', '-Wpedantic']
+        env.LIBPATH += [boost_libs_path]
+        env.INCLUDES += [boost_include_path]
+        env.LIB += ['pthread']
+        env.STLIB += ['boost_log', 'boost_thread', 'boost_system']
 
-    conf.env.LIBPATH += [boost_libs_path]
-    conf.env.INCLUDES += [boost_include_path]
-    conf.env.LIB += ['pthread']
-    conf.env.STLIB += ['boost_log', 'boost_thread', 'boost_system']
+    # Setup debug configuration
+    conf.setenv('debug')
+    conf.load('compiler_cxx')
+    common_setup(conf.env)
+    conf.env.CXXFLAGS += ['-g']
+    conf.env.CXXFLAGS += ['-O0']
+
+    # Setup release configuration
+    conf.setenv('release')
+    conf.load('compiler_cxx')
+    common_setup(conf.env)
+    conf.env.CXXFLAGS += ['-O3']
 
 
 def build(bld):
+    if not bld.variant:
+        bld.fatal('call "waf build_debug" or "waf build_release",'
+                  ' and try "waf --help"')
     bld.program(source=bld.path.ant_glob('**/*.cc'),
                 target='testrunner',
                 includes=['src', 'thirdparty/gtest'])
+
+
+for x in 'debug release'.split():
+    for y in (BuildContext, CleanContext, InstallContext, UninstallContext):
+        name = y.__name__.replace('Context', '').lower()
+
+        class tmp(y):
+            cmd = name + '_' + x
+            variant = x
