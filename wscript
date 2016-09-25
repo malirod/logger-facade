@@ -4,6 +4,7 @@
 import os
 from waflib.Build import (BuildContext, CleanContext,
                           InstallContext, UninstallContext)
+from multiprocessing import cpu_count
 
 top = '.'
 out = 'build'
@@ -44,6 +45,7 @@ def build(bld):
     if not bld.variant:
         bld.fatal('call "waf build_debug" or "waf build_release",'
                   ' and try "waf --help"')
+    bld.jobs=cpu_count()
     bld.program(source=bld.path.ant_glob('**/*.cc'),
                 target='testrunner',
                 includes=['src', 'thirdparty/gtest'])
