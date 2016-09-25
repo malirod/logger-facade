@@ -31,3 +31,6 @@
 build/*
 
 *.pyc
+
+*.lock-waf_*
+*.waf-*
