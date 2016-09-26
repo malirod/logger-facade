@@ -1,6 +1,12 @@
 # boost-log
 Boost logger sample
 
+##Platform
+
+Ubuntu 16.04: Clang 3.8, GCC 5.4
+
+C++11 Standard is used.
+
 ##Setup
 
 ###Install Boost
