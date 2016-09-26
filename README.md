@@ -40,6 +40,12 @@ Set env pointing to the boost install dir (in ~/.profile or ~/.bashrc)
 
 Restart terminal, or reload config with `source ~/.profile` (`source ~/.bashrc`)
 
+##Setup git hook
+
+Run `python tools/infrastructure/install_hooks.py`
+
+This will allow to perform some code checks locally before posting changes to server.
+
 ##Build
 
 In the project root call
