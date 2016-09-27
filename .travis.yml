@@ -1,0 +1,12 @@
+sudo: required
+dist: trusty
+language: cpp
+
+services:
+  - docker
+
+before_install:
+  - docker build -t travis-build -f tools/infrastructure/Dockerfile .
+
+script:
+  - docker run travis-build build/debug/testrunner
