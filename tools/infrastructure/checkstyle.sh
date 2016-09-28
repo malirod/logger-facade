@@ -11,8 +11,10 @@ TEXT_BOLD="\\0033[1m"
 
 ##################################################################
 ### Check for odd whitespace
+echo -e "Checking odd whitespaces"
 git diff --check $COMMITS_RANGE --color
 if [ "$?" -ne "0" ]; then
     echo -e "$TEXT_ERROR" "Your changes introduce whitespace errors" "$TEXT_DEFAULT"
     exit 1
 fi
+echo -e "PASSED"

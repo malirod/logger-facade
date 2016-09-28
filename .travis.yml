@@ -9,4 +9,5 @@ before_install:
   - docker build -t travis-build -f tools/infrastructure/Dockerfile .
 
 script:
+  - docker run travis-build tools/infrastructure/checkstyle.sh $TRAVIS_COMMIT_RANGE
   - docker run travis-build build/debug/testrunner
