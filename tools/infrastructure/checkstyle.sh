@@ -88,6 +88,12 @@ else
     echo -e "and the clang-format rules:"
     echo -e "$TEXT_INFO"
     cat $patch
+    echo -e "$TEXT_ERROR"
+    echo -e "You can apply these changes with:"
+    echo -e "git apply $patch"
+    echo -e "(may need to be called from the root directory of your repository)"
+    echo -e "Aborting commit. Apply changes and commit again or skip checking with"
+    echo -e " --no-verify (not recommended)."
     echo -e "$TEXT_DEFAULT"
 
     exit 2
