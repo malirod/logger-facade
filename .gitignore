@@ -27,3 +27,10 @@
 *.exe
 *.out
 *.app
+.gradle/*
+build/*
+
+*.pyc
+
+*.lock-waf_*
+*.waf-*
