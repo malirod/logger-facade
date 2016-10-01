@@ -23,5 +23,4 @@ WORKDIR $PROJECT_ROOT
 RUN apt-get install -y clang clang-format
 RUN CXX=clang++ ./waf configure build_debug build_release
 
-RUN apt-get install -y python-pip
-RUN pip install flake8
+RUN apt-get install pylint

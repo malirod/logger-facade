@@ -46,6 +46,10 @@ Run `python tools/infrastructure/install_hooks.py`
 
 This will allow to perform some code checks locally before posting changes to server.
 
+##Install pylint - python checker
+
+`sudo apt-get install pylint`
+
 ##Build
 
 In the project root call
