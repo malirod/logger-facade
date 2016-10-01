@@ -23,4 +23,4 @@ WORKDIR $PROJECT_ROOT
 RUN apt-get install -y clang clang-format
 RUN CXX=clang++ ./waf configure build_debug build_release
 
-RUN apt-get install pylint
+RUN apt-get install -y pylint
