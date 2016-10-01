@@ -16,6 +16,7 @@ def setup_working_dir():
 
 
 def run_cmd(cmd_line):
+    """ Run command in system shell """
     import subprocess
 
     return subprocess.call(cmd_line, shell=True)
@@ -24,9 +25,9 @@ def run_cmd(cmd_line):
 def walk_dir(directory, action, recursive=True):
     """ Walks a directory, and executes the action on each file """
     directory = os.path.abspath(directory)
-    for file in [file for file in os.listdir(directory)
-                 if file not in [os.curdir, os.pardir]]:
-        file_path = os.path.join(directory, file)
+    for item in [item for item in os.listdir(directory)
+                 if item not in [os.curdir, os.pardir]]:
+        file_path = os.path.join(directory, item)
         action(file_path)
         if recursive and os.path.isdir(file_path):
             walk_dir(file_path, action)
