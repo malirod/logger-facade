@@ -1,13 +1,12 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import os
-from waflib.Build import (BuildContext, CleanContext,
-                          InstallContext, UninstallContext)
 from multiprocessing import cpu_count
+from waflib.Build import (BuildContext, CleanContext, # pylint: disable=import-error
+                          InstallContext, UninstallContext)
 
-top = '.'
-out = 'build'
+top = '.' # pylint: disable=invalid-name
+out = 'build' # pylint: disable=invalid-name
 
 
 def options(opt):
@@ -15,7 +14,7 @@ def options(opt):
 
 
 def configure(conf):
-    print ('Configuring the project in ' + conf.path.abspath())
+    print 'Configuring the project in ' + conf.path.abspath()
 
     boost_include_path = os.path.join(os.getenv('BOOST_HOME'), "include")
     boost_libs_path = os.path.join(os.getenv('BOOST_HOME'), "lib")
@@ -45,7 +44,7 @@ def build(bld):
     if not bld.variant:
         bld.fatal('call "waf build_debug" or "waf build_release",'
                   ' and try "waf --help"')
-    bld.jobs=cpu_count()
+    bld.jobs = cpu_count()
     bld.program(source=bld.path.ant_glob('**/*.cc'),
                 target='testrunner',
                 includes=['src', 'thirdparty/gtest'])
@@ -55,6 +54,6 @@ for x in 'debug release'.split():
     for y in (BuildContext, CleanContext, InstallContext, UninstallContext):
         name = y.__name__.replace('Context', '').lower()
 
-        class tmp(y):
+        class Tmp(y): # pylint: disable=too-few-public-methods
             cmd = name + '_' + x
             variant = x

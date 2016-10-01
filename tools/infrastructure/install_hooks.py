@@ -12,6 +12,7 @@ from utils import setup_working_dir
 
 
 def uninstall_hooks(hooks_dir):
+    """ Delete existing pre-commit hook in git dir """
     print 'Deleting existing pre-commit hooks from {}'.format(hooks_dir)
     files = glob.glob(os.path.join(hooks_dir, 'pre-commit*'))
     for item in files:
@@ -19,6 +20,7 @@ def uninstall_hooks(hooks_dir):
 
 
 def install_hooks(src_dir, dst_dir):
+    """ Copy hook file to the git dir """
     print 'Installing pre-commit hooks'
     src_files = glob.glob(os.path.join(src_dir, 'pre-commit*'))
     for item in src_files:
