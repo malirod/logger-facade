@@ -5,6 +5,11 @@ language: cpp
 services:
   - docker
 
+branches:
+  only:
+    - master
+    - develop
+
 before_install:
   - docker build -t travis-build -f tools/infrastructure/Dockerfile .
 
