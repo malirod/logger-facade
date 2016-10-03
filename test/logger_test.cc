@@ -2,6 +2,6 @@
 #include "gtest/gtest.h"
 
 TEST(TestLogger, DummyTest) {
-  BOOST_LOG_TRIVIAL(trace) << "A trace severity message";
+  LOG_DEBUG << "lamer";
   EXPECT_TRUE(true == true);
 }
