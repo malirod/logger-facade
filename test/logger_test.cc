@@ -2,6 +2,7 @@
 #include "gtest/gtest.h"
 
 TEST(TestLogger, DummyTest) {
-  LOG_DEBUG << "lamer";
+  blsb::LoggerType local_logger;
+  LOG_DEBUG(local_logger) << "lamer";
   EXPECT_TRUE(true == true);
 }

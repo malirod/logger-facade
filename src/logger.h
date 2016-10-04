@@ -1,38 +1,23 @@
 #pragma once
 
-#include <fstream>
-
 #include <boost/log/core/core.hpp>
-#include <boost/log/sources/global_logger_storage.hpp>
-#include <boost/log/sources/logger.hpp>
 #include <boost/log/trivial.hpp>
-#include <boost/log/utility/setup/from_stream.hpp>
 
-namespace sdllog {
-namespace logging = boost::log;
-namespace src = boost::log::sources;
-using LoggerType = src::logger_mt;
+namespace blsb {
 
-#define SEVERITY_THRESHOLD logging::trivial::warning
+using LoggerType = boost::log::trivial::logger_type;
 
-BOOST_LOG_GLOBAL_LOGGER(logger,
-                        boost::log::sources::severity_logger_mt<
-                            boost::log::trivial::severity_level>)
+void load_log_config();
 
-#define LOG(severity) \
-  BOOST_LOG_SEV(logger::get(), boost::log::trivial::severity)
+}  // namespace blsb
 
-#define LOG_TRACE LOG(trace)
-#define LOG_INFO LOG(info)
-#define LOG_DEBUG LOG(debug)
-#define LOG_WARNING LOG(warning)
-#define LOG_ERROR LOG(error)
-#define LOG_FATAL LOG(fatal)
+#define BLSB_LOG(logger, severity) BOOST_LOG_SEV(logger, severity)
 
-#define INIT_LOGGER()                         \
-  std::ifstream log_config("logger.cfg");     \
-  if (log_config.is_open()) {                 \
-    boost::log::init_from_stream(log_config); \
-  }
+#define LOG_TRACE(logger) BLSB_LOG(logger, boost::log::trivial::trace)
+#define LOG_INFO(logger) BLSB_LOG(logger, boost::log::trivial::info)
+#define LOG_DEBUG(logger) BLSB_LOG(logger, boost::log::trivial::debug)
+#define LOG_WARNING(logger) BLSB_LOG(logger, boost::log::trivial::warning)
+#define LOG_ERROR(logger) BLSB_LOG(logger, boost::log::trivial::error)
+#define LOG_FATAL(logger) BLSB_LOG(logger, boost::log::trivial::fatal)
 
-}  // namespace log
+#define INIT_LOGGER() blsb::load_log_config()
