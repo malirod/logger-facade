@@ -24,7 +24,8 @@ def configure(conf):
         env.LIBPATH += [boost_libs_path]
         env.INCLUDES += [boost_include_path]
         env.LIB += ['pthread']
-        env.STLIB += ['boost_log', 'boost_thread', 'boost_system']
+        env.STLIB += ['boost_log_setup', 'boost_log', 'boost_thread',
+                      'boost_system', 'boost_filesystem', 'boost_regex']
 
     # Setup debug configuration
     conf.setenv('debug')
@@ -38,7 +39,6 @@ def configure(conf):
     conf.load('compiler_cxx')
     common_setup(conf.env)
     conf.env.CXXFLAGS += ['-O3']
-
 
 def build(bld):
     if not bld.variant:
