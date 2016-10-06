@@ -20,7 +20,8 @@ def configure(conf):
     boost_libs_path = os.path.join(os.getenv('BOOST_HOME'), "lib")
 
     def common_setup(env):
-        env.CXXFLAGS += ['-std=c++11', '-Wextra', '-Werror', '-Wpedantic']
+        # env.CXXFLAGS += ['-std=c++11', '-Wextra', '-Werror', '-Wpedantic']
+        env.CXXFLAGS += ['-std=c++11', '-Wextra', '-Wpedantic']
         env.LIBPATH += [boost_libs_path]
         env.INCLUDES += [boost_include_path]
         env.LIB += ['pthread']

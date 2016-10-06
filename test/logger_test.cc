@@ -36,4 +36,6 @@ TEST(TestLogger, LogFromFreeFunctionFromAnonymousNamespace) {
 TEST(TestLogger, LogFromClassMethod) {
   Foo::Bar bar;
   bar.OutputTestLogLines();
+
+  BOOST_LOG_TRIVIAL(fatal) << "AAA";
 }

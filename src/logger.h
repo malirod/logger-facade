@@ -7,11 +7,7 @@
 
 #if !defined(DISABLE_LOGGER)
 
-// Strip off log lines lower or qeual DEBUG in DEBUG mode
-//#if !defined (DEBUG)
-//#define CUT_OFF_DEBUG_LOG
-//#endif // DEBUG
-
+// #define LOGGER_CLASS_TYPE boost::log::trivial::logger_type
 #define LOGGER_CLASS_TYPE boost::log::trivial::logger_type
 
 #define LOGGER_SEVERITY_TYPE_TRACE boost::log::trivial::trace
@@ -23,11 +19,11 @@
 
 namespace blsb {
 
-void load_log_config(const std::string& path);
+void init_logging(const std::string& config_file_path);
 
 }  // namespace blsb
 
-#define INIT_LOGGER(LogConfigPath) blsb::load_log_config(LogConfigPath)
+#define INIT_LOGGER(LogConfigPath) blsb::init_logging(LogConfigPath)
 
 #define BLSB_LOG(logger, severity) BOOST_LOG_SEV(logger, severity)
 
