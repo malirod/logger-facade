@@ -11,6 +11,8 @@ out = 'build' # pylint: disable=invalid-name
 
 def options(opt):
     opt.load('compiler_cxx')
+    opt.add_option('--init', action='store_true', default=False,
+                   help='Init output dir after build')
 
 
 def configure(conf):
@@ -40,14 +42,35 @@ def configure(conf):
     common_setup(conf.env)
     conf.env.CXXFLAGS += ['-O3']
 
+
+def post_build(bld):
+    print 'Post build step'
+    if bld.options.init:
+        print 'Init project'
+
+
 def build(bld):
     if not bld.variant:
         bld.fatal('call "waf build_debug" or "waf build_release",'
                   ' and try "waf --help"')
+
     bld.jobs = cpu_count()
-    bld.program(source=bld.path.ant_glob('**/*.cc'),
+    bld.add_post_fun(post_build)
+
+    bld_common_includes = ['src', 'thirdparty/gtest']
+
+    special_files = ['src/logger.cc']
+    special_target = 'special_objects'
+
+    bld.objects(source=special_files[0],
+                target=special_target,
+                cxxflags=['-Wno-unused-parameter'],
+                includes=bld_common_includes)
+
+    bld.program(source=bld.path.ant_glob(['**/*.cc'], excl=special_files),
                 target='testrunner',
-                includes=['src', 'thirdparty/gtest'])
+                includes=bld_common_includes,
+                use=special_target)
 
 
 for x in 'debug release'.split():
