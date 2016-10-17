@@ -1,6 +1,8 @@
 #pragma once
 
-#define LOGGER_EMPTY_BODY (void)0;
+#define DOWHILE_NOTHING() \
+  do {                    \
+  } while (0)
 
 #if !defined(DISABLE_LOGGER)
 
@@ -17,11 +19,11 @@
 #define LOGGER_SEVERITY_TYPE_ERROR boost::log::trivial::error
 #define LOGGER_SEVERITY_TYPE_FATAL boost::log::trivial::fatal
 
-#define BLSB_LOG_SCOPE(logger, severity, line, file, function) \
-  BOOST_LOG_SEV(logger, severity)                              \
-      << boost::log::add_value("Line", line)                   \
-      << boost::log::add_value("File", file)                   \
-      << boost::log::add_value("Function", function)
+#define BLSB_LOG_SCOPE(logger, severity, line, file, function, message) \
+  BOOST_LOG_SEV(logger, severity)                                       \
+      << boost::log::add_value("Line", line)                            \
+      << boost::log::add_value("File", file)                            \
+      << boost::log::add_value("Function", function) << message
 
 namespace blsb {
 
@@ -43,13 +45,21 @@ class TraceLogger {
       , file_(file)
       , line_(line)
       , function_(function) {
-    BLSB_LOG_SCOPE(logger_, LOGGER_SEVERITY_TYPE_TRACE, line_, file_, function_)
-        << "ENTER: " << message_;
+    BLSB_LOG_SCOPE(logger_,
+                   LOGGER_SEVERITY_TYPE_TRACE,
+                   line_,
+                   file_,
+                   function_,
+                   "ENTER: " << message_);
   }
 
   ~TraceLogger() {
-    BLSB_LOG_SCOPE(logger_, LOGGER_SEVERITY_TYPE_TRACE, line_, file_, function_)
-        << "EXIT: " << message_;
+    BLSB_LOG_SCOPE(logger_,
+                   LOGGER_SEVERITY_TYPE_TRACE,
+                   line_,
+                   file_,
+                   function_,
+                   "EXIT: " << message_);
   }
 
  private:
@@ -62,47 +72,54 @@ class TraceLogger {
 
 }  // namespace blsb
 
-#define INIT_LOGGER(LogConfigPath) blsb::init_logging(LogConfigPath)
+#define INIT_LOGGER(log_config_path) blsb::init_logging(log_config_path)
 
-#define BLSB_LOG(logger, severity) \
-  BLSB_LOG_SCOPE(logger, severity, __LINE__, __FILE__, BOOST_CURRENT_FUNCTION)
+#define BLSB_LOG(logger, severity, message) \
+  BLSB_LOG_SCOPE(                           \
+      logger, severity, __LINE__, __FILE__, BOOST_CURRENT_FUNCTION, message)
 
 #if defined(CUT_OFF_DEBUG_LOG)
-#define LOG_TRACEL(logger) LOGGER_EMPTY_BODY
-#define LOG_DEBUGL(logger) LOGGER_EMPTY_BODY
+#define LOG_TRACEL(logger, message) DOWHILE_NOTHING()
+#define LOG_DEBUGL(logger, message) DOWHILE_NOTHING()
 #else  // CUT_OFF_DEBUG_LOG
-#define LOG_TRACEL(logger) BLSB_LOG(logger, LOGGER_SEVERITY_TYPE_TRACE)
-#define LOG_DEBUGL(logger) BLSB_LOG(logger, LOGGER_SEVERITY_TYPE_DEBUG)
+#define LOG_TRACEL(logger, message) \
+  BLSB_LOG(logger, LOGGER_SEVERITY_TYPE_TRACE, message)
+#define LOG_DEBUGL(logger, message) \
+  BLSB_LOG(logger, LOGGER_SEVERITY_TYPE_DEBUG, message)
 #endif  // CUT_OFF_DEBUG_LOG
 
-#define LOG_INFOL(logger) BLSB_LOG(logger, LOGGER_SEVERITY_TYPE_INFO)
-#define LOG_WARNL(logger) BLSB_LOG(logger, LOGGER_SEVERITY_TYPE_WARN)
-#define LOG_ERRORL(logger) BLSB_LOG(logger, LOGGER_SEVERITY_TYPE_ERROR)
-#define LOG_FATALL(logger) BLSB_LOG(logger, LOGGER_SEVERITY_TYPE_FATAL)
+#define LOG_INFOL(logger, message) \
+  BLSB_LOG(logger, LOGGER_SEVERITY_TYPE_INFO, message)
+#define LOG_WARNL(logger, message) \
+  BLSB_LOG(logger, LOGGER_SEVERITY_TYPE_WARN, message)
+#define LOG_ERRORL(logger, message) \
+  BLSB_LOG(logger, LOGGER_SEVERITY_TYPE_ERROR, message)
+#define LOG_FATALL(logger, message) \
+  BLSB_LOG(logger, LOGGER_SEVERITY_TYPE_FATAL, message)
 
-#define DECLARE_GET_LOGGER(LoggerName)                    \
-  LOGGER_CLASS_TYPE& GetLogger() {                        \
-    static auto logger = blsb::create_logger(LoggerName); \
-    return logger;                                        \
+#define DECLARE_GET_LOGGER(logger_name)                    \
+  LOGGER_CLASS_TYPE& GetLogger() {                         \
+    static auto logger = blsb::create_logger(logger_name); \
+    return logger;                                         \
   }
 
-#define DECLARE_GLOBAL_GET_LOGGER(LoggerName) \
-  namespace {                                 \
-  DECLARE_GET_LOGGER(LoggerName)              \
+#define DECLARE_GLOBAL_GET_LOGGER(logger_name) \
+  namespace {                                  \
+  DECLARE_GET_LOGGER(logger_name)              \
   }  // namespace
 
 #if defined(CUT_OFF_DEBUG_LOG)
-#define LOG_TRACE() LOGGER_EMPTY_BODY
-#define LOG_DEBUG() LOGGER_EMPTY_BODY
+#define LOG_TRACE(message) DOWHILE_NOTHING()
+#define LOG_DEBUG(message) DOWHILE_NOTHING()
 #else  // CUT_OFF_DEBUG_LOG
-#define LOG_TRACE() LOG_TRACEL(GetLogger())
-#define LOG_DEBUG() LOG_DEBUGL(GetLogger())
+#define LOG_TRACE(message) LOG_TRACEL(GetLogger(), message)
+#define LOG_DEBUG(message) LOG_DEBUGL(GetLogger(), message)
 #endif  // CUT_OFF_DEBUG_LOG
 
-#define LOG_INFO() LOG_INFOL(GetLogger())
-#define LOG_WARN() LOG_WARNL(GetLogger())
-#define LOG_ERROR() LOG_ERRORL(GetLogger())
-#define LOG_FATAL() LOG_FATALL(GetLogger())
+#define LOG_INFO(message) LOG_INFOL(GetLogger(), message)
+#define LOG_WARN(message) LOG_WARNL(GetLogger(), message)
+#define LOG_ERROR(message) LOG_ERRORL(GetLogger(), message)
+#define LOG_FATAL(message) LOG_FATALL(GetLogger(), message)
 
 #define LOG_AUTO_TRACEL(logger, message) \
   blsb::TraceLogger auto_trace_logger__( \
@@ -111,28 +128,28 @@ class TraceLogger {
 
 #else  // DISABLE_LOGGER
 
-#define INIT_LOGGER(LogConfigPath) LOGGER_EMPTY_BODY
+#define INIT_LOGGER(log_config_path) DOWHILE_NOTHING()
 
-#define BLSB_LOG(logger, severity) LOGGER_EMPTY_BODY
+#define BLSB_LOG(logger, severity, message) DOWHILE_NOTHING()
 
-#define LOG_TRACEL(logger) LOGGER_EMPTY_BODY
-#define LOG_DEBUGL(logger) LOGGER_EMPTY_BODY
-#define LOG_INFOL(logger) LOGGER_EMPTY_BODY
-#define LOG_WARNL(logger) LOGGER_EMPTY_BODY
-#define LOG_ERRORL(logger) LOGGER_EMPTY_BODY
-#define LOG_FATALL(logger) LOGGER_EMPTY_BODY
+#define LOG_TRACEL(logger, message) DOWHILE_NOTHING()
+#define LOG_DEBUGL(logger, message) DOWHILE_NOTHING()
+#define LOG_INFOL(logger, message) DOWHILE_NOTHING()
+#define LOG_WARNL(logger, message) DOWHILE_NOTHING()
+#define LOG_ERRORL(logger, message) DOWHILE_NOTHING()
+#define LOG_FATALL(logger, message) DOWHILE_NOTHING()
 
-#define DECLARE_GET_LOGGER(LoggerName) LOGGER_EMPTY_BODY
-#define DECLARE_GLOBAL_GET_LOGGER(LoggerName) LOGGER_EMPTY_BODY
+#define DECLARE_GET_LOGGER(logger_name)
+#define DECLARE_GLOBAL_GET_LOGGER(logger_name)
 
-#define LOG_TRACE() LOGGER_EMPTY_BODY
-#define LOG_DEBUG() LOGGER_EMPTY_BODY
-#define LOG_INFO(l) LOGGER_EMPTY_BODY
-#define LOG_WARN(l) LOGGER_EMPTY_BODY
-#define LOG_ERROR() LOGGER_EMPTY_BODY
-#define LOG_FATAL() LOGGER_EMPTY_BODY
+#define LOG_TRACE(message) DOWHILE_NOTHING()
+#define LOG_DEBUG(message) DOWHILE_NOTHING()
+#define LOG_INFO(message) DOWHILE_NOTHING()
+#define LOG_WARN(message) DOWHILE_NOTHING()
+#define LOG_ERROR(message) DOWHILE_NOTHING()
+#define LOG_FATAL(message) DOWHILE_NOTHING()
 
-#define LOG_AUTO_TRACEL(logger, message) LOGGER_EMPTY_BODY
-#define LOG_AUTO_TRACE() LOGGER_EMPTY_BODY
+#define LOG_AUTO_TRACEL(logger, message) DOWHILE_NOTHING()
+#define LOG_AUTO_TRACE() DOWHILE_NOTHING()
 
 #endif  // DISABLE_LOGGER

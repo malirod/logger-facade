@@ -1,4 +1,5 @@
 #include "logger.h"
+#if !defined(DISABLE_LOGGER)
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/log/attributes/constant.hpp>
 #include <boost/log/expressions.hpp>
@@ -63,3 +64,5 @@ LOGGER_CLASS_TYPE blsb::create_logger(const char* name) {
                        boost::log::attributes::constant<std::string>(name));
   return logger;
 }
+
+#endif  // DISABLE_LOGGER
