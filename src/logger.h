@@ -28,6 +28,7 @@
 namespace blsb {
 
 void init_logging(const std::string& config_file_path);
+
 LOGGER_CLASS_TYPE create_logger(const char* name);
 
 class TraceLogger {

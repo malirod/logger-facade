@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import shutil
 from multiprocessing import cpu_count
 from waflib.Build import (BuildContext, CleanContext, # pylint: disable=import-error
                           InstallContext, UninstallContext)
@@ -44,9 +45,10 @@ def configure(conf):
 
 
 def post_build(bld):
-    print 'Post build step'
     if bld.options.init:
-        print 'Init project'
+        print 'Post build step: copy logging config to the project root'
+        source_cfg = os.path.join(bld.path.abspath(), 'config', 'logger.cfg')
+        shutil.copy(source_cfg, bld.path.abspath())
 
 
 def build(bld):
