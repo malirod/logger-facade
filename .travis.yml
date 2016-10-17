@@ -15,11 +15,11 @@ before_install:
 
 script:
   - docker run travis-build tools/infrastructure/checkstyle.sh $TRAVIS_COMMIT_RANGE
-  - docker run travis-build /bin/bash -c "CXX=clang++ ./waf configure build_debug build_release"
+  - docker run travis-build /bin/bash -c "CXX=clang++ ./waf configure build_debug --init build_release"
   - docker commit $(docker ps -l -q) travis-build
   - docker run travis-build build/debug/testrunner
   - docker run travis-build /bin/bash -c "./waf clean_debug clean_release"
   - docker commit $(docker ps -l -q) travis-build
-  - docker run travis-build /bin/bash -c "CXXFLAGS=-DDISABLE_LOGGER CXX=clang++ ./waf configure build_debug build_release"
+  - docker run travis-build /bin/bash -c "CXXFLAGS=-DDISABLE_LOGGER CXX=clang++ ./waf configure build_debug --init build_release"
   - docker commit $(docker ps -l -q) travis-build
   - docker run travis-build build/debug/testrunner
