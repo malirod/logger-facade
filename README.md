@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/malirod/boost-log.svg?branch=master)](https://travis-ci.org/malirod/boost-log)
+
 # boost-log
 Boost logger sample
 
@@ -59,3 +61,15 @@ In the project root call
 GCC is used by defaul. This can be changed in the folling way.
 
 `CXX=clang++ ./waf configure`
+
+Use '--init' flag during build to prepare for execution. E.g.
+
+`./waf build_debug --init`
+
+This will copy default config to the project root.
+
+##Run
+
+Run from project root. It's expected that config is located in the project root.
+
+`build/debug/testrunner`
