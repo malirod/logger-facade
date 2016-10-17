@@ -49,12 +49,25 @@ TEST(TestLogger, LogFromClassMethod) {
   bar.OutputTestLogLines();
 }
 
-TEST(TestLogger, TestAutoTrace) {
+TEST(TestLogger, AutoTrace) {
   Foo::Bar bar;
   bar.OutputAutoTrace();
 }
 
-TEST(TestLogger, TestChainedOutput) {
+TEST(TestLogger, ChainedOutput) {
   LOG_INFO("Some int: " << 10 << "; some string: "
                         << "str");
+}
+
+TEST(TestLogger, UseLocalLogger) {
+  auto logger = blsb::create_logger("Test.Local.Logger");
+  LOG_INFOL(logger, "Log with local logger");
+}
+
+TEST(TestLogger, WriteToLogInLoop) {
+  LOG_AUTO_TRACE();
+  const auto kIterationCount = 7000;
+  for (auto i = 1; i <= kIterationCount; ++i) {
+    LOG_TRACE("Logging from loop. Iteration #" << i);
+  }
 }
