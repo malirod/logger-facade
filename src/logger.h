@@ -27,8 +27,6 @@
 
 namespace blsb {
 
-void init_logging(const std::string& config_file_path);
-
 LOGGER_CLASS_TYPE create_logger(const char* name);
 
 class TraceLogger {
@@ -71,9 +69,19 @@ class TraceLogger {
   const char* function_;
 };
 
+class LogManager {
+ public:
+  explicit LogManager(const char* config_file_path);
+  ~LogManager();
+
+  LogManager(const LogManager&) = delete;
+  LogManager& operator=(const LogManager&) = delete;
+};
+
 }  // namespace blsb
 
-#define INIT_LOGGER(log_config_path) blsb::init_logging(log_config_path)
+#define INIT_LOGGER(log_config_path) \
+  blsb::LogManager log_manager__(log_config_path)
 
 #define BLSB_LOG(logger, severity, message) \
   BLSB_LOG_SCOPE(                           \
