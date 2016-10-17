@@ -68,7 +68,7 @@ TEST(TestLogger, UseLocalLogger) {
 
 TEST(TestLogger, WriteToLogInLoop) {
   LOG_AUTO_TRACE();
-  const auto kIterationCount = 7000;
+  const auto kIterationCount = 11000;
   for (auto i = 1; i <= kIterationCount; ++i) {
     LOG_TRACE("Logging from loop. Iteration #" << i);
   }

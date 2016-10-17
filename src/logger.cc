@@ -34,9 +34,7 @@ class TimeStampFormatterFactory
   }
 };
 
-}  // namespace
-
-void blsb::init_logging(const std::string& config_file_path) {
+void init_logging(const char* config_file_path) {
   std::ifstream log_config(config_file_path);
   if (!log_config.is_open()) {
     return;
@@ -58,11 +56,22 @@ void blsb::init_logging(const std::string& config_file_path) {
   boost::log::init_from_stream(log_config);
 }
 
+}  // namespace
+
 LOGGER_CLASS_TYPE blsb::create_logger(const char* name) {
   LOGGER_CLASS_TYPE logger;
   logger.add_attribute("Name",
                        boost::log::attributes::constant<std::string>(name));
   return logger;
+}
+
+blsb::LogManager::LogManager(const char* config_file_path) {
+  init_logging(config_file_path);
+}
+
+blsb::LogManager::~LogManager() {
+  boost::log::core::get()->flush();
+  boost::log::core::get()->remove_all_sinks();
 }
 
 #endif  // DISABLE_LOGGER
