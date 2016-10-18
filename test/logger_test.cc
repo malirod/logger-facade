@@ -61,7 +61,7 @@ TEST(TestLogger, ChainedOutput) {
 
 #if !defined(DISABLE_LOGGER)
 TEST(TestLogger, UseLocalLogger) {
-  auto logger = blsb::create_logger("Test.Local.Logger");
+  auto logger = blsb::logging::create_logger("Test.Local.Logger");
   LOG_INFOL(logger, "Log with local logger");
 }
 #endif  // DISABLE_LOGGER

@@ -32,7 +32,7 @@ def main():
     setup_working_dir()
     print 'Current working dir is {}'.format(os.getcwd())
     hooks_src_dir = os.path.join(
-        os.getcwd(), 'tools', 'infrastructure', 'git-hooks')
+        os.getcwd(), 'infrastructure', 'tools', 'git-hooks')
     hooks_dst_dir = os.path.join(os.getcwd(), '.git', 'hooks')
     uninstall_hooks(hooks_dst_dir)
     install_hooks(hooks_src_dir, hooks_dst_dir)

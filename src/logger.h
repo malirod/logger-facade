@@ -7,17 +7,8 @@
 #if !defined(DISABLE_LOGGER)
 
 #include <boost/log/core/core.hpp>
-#include <boost/log/trivial.hpp>
+#include <boost/log/sources/severity_logger.hpp>
 #include <boost/log/utility/manipulators/add_value.hpp>
-
-#define LOGGER_CLASS_TYPE boost::log::trivial::logger_type
-
-#define LOGGER_SEVERITY_TYPE_TRACE boost::log::trivial::trace
-#define LOGGER_SEVERITY_TYPE_DEBUG boost::log::trivial::debug
-#define LOGGER_SEVERITY_TYPE_INFO boost::log::trivial::info
-#define LOGGER_SEVERITY_TYPE_WARN boost::log::trivial::warning
-#define LOGGER_SEVERITY_TYPE_ERROR boost::log::trivial::error
-#define LOGGER_SEVERITY_TYPE_FATAL boost::log::trivial::fatal
 
 #define BLSB_LOG_SCOPE(logger, severity, line, file, function, message) \
   BOOST_LOG_SEV(logger, severity)                                       \
@@ -26,15 +17,28 @@
       << boost::log::add_value("Function", function) << message
 
 namespace blsb {
+namespace logging {
 
-LOGGER_CLASS_TYPE create_logger(const char* name);
+enum SeverityLevel { lvlTRACE, lvlDEBUG, lvlINFO, lvlWARN, lvlERROR, lvlFATAL };
+
+using LoggerClassType = boost::log::sources::severity_logger_mt<SeverityLevel>;
+
+template <typename CharT, typename TraitsT>
+std::basic_ostream<CharT, TraitsT>& operator<<(
+    std::basic_ostream<CharT, TraitsT>& strm, SeverityLevel lvl);
+
+template <typename CharT, typename TraitsT>
+std::basic_istream<CharT, TraitsT>& operator>>(
+    std::basic_istream<CharT, TraitsT>& strm, SeverityLevel& lvl);
+
+LoggerClassType create_logger(const char* name);
 
 class TraceLogger {
  public:
   TraceLogger(const TraceLogger&) = delete;
   TraceLogger& operator=(const TraceLogger&) = delete;
 
-  TraceLogger(LOGGER_CLASS_TYPE logger,
+  TraceLogger(LoggerClassType logger,
               std::string message,
               const char* file,
               int line,
@@ -45,7 +49,7 @@ class TraceLogger {
       , line_(line)
       , function_(function) {
     BLSB_LOG_SCOPE(logger_,
-                   LOGGER_SEVERITY_TYPE_TRACE,
+                   blsb::logging::lvlTRACE,
                    line_,
                    file_,
                    function_,
@@ -54,7 +58,7 @@ class TraceLogger {
 
   ~TraceLogger() {
     BLSB_LOG_SCOPE(logger_,
-                   LOGGER_SEVERITY_TYPE_TRACE,
+                   blsb::logging::lvlTRACE,
                    line_,
                    file_,
                    function_,
@@ -62,7 +66,7 @@ class TraceLogger {
   }
 
  private:
-  LOGGER_CLASS_TYPE logger_;
+  LoggerClassType logger_;
   std::string message_;
   const char* file_;
   int line_;
@@ -72,16 +76,18 @@ class TraceLogger {
 class LogManager {
  public:
   explicit LogManager(const char* config_file_path);
+  explicit LogManager(std::istream& log_config);
   ~LogManager();
 
   LogManager(const LogManager&) = delete;
   LogManager& operator=(const LogManager&) = delete;
 };
 
+}  // namespace logging
 }  // namespace blsb
 
 #define INIT_LOGGER(log_config_path) \
-  blsb::LogManager log_manager__(log_config_path)
+  blsb::logging::LogManager log_manager__(log_config_path)
 
 #define BLSB_LOG(logger, severity, message) \
   BLSB_LOG_SCOPE(                           \
@@ -92,24 +98,24 @@ class LogManager {
 #define LOG_DEBUGL(logger, message) DOWHILE_NOTHING()
 #else  // CUT_OFF_DEBUG_LOG
 #define LOG_TRACEL(logger, message) \
-  BLSB_LOG(logger, LOGGER_SEVERITY_TYPE_TRACE, message)
+  BLSB_LOG(logger, blsb::logging::lvlTRACE, message)
 #define LOG_DEBUGL(logger, message) \
-  BLSB_LOG(logger, LOGGER_SEVERITY_TYPE_DEBUG, message)
+  BLSB_LOG(logger, blsb::logging::lvlDEBUG, message)
 #endif  // CUT_OFF_DEBUG_LOG
 
 #define LOG_INFOL(logger, message) \
-  BLSB_LOG(logger, LOGGER_SEVERITY_TYPE_INFO, message)
+  BLSB_LOG(logger, blsb::logging::lvlINFO, message)
 #define LOG_WARNL(logger, message) \
-  BLSB_LOG(logger, LOGGER_SEVERITY_TYPE_WARN, message)
+  BLSB_LOG(logger, blsb::logging::lvlWARN, message)
 #define LOG_ERRORL(logger, message) \
-  BLSB_LOG(logger, LOGGER_SEVERITY_TYPE_ERROR, message)
+  BLSB_LOG(logger, blsb::logging::lvlERROR, message)
 #define LOG_FATALL(logger, message) \
-  BLSB_LOG(logger, LOGGER_SEVERITY_TYPE_FATAL, message)
+  BLSB_LOG(logger, blsb::logging::lvlFATAL, message)
 
-#define DECLARE_GET_LOGGER(logger_name)                    \
-  LOGGER_CLASS_TYPE& GetLogger() {                         \
-    static auto logger = blsb::create_logger(logger_name); \
-    return logger;                                         \
+#define DECLARE_GET_LOGGER(logger_name)                             \
+  blsb::logging::LoggerClassType& GetLogger() {                     \
+    static auto logger = blsb::logging::create_logger(logger_name); \
+    return logger;                                                  \
   }
 
 #define DECLARE_GLOBAL_GET_LOGGER(logger_name) \
@@ -130,8 +136,8 @@ class LogManager {
 #define LOG_ERROR(message) LOG_ERRORL(GetLogger(), message)
 #define LOG_FATAL(message) LOG_FATALL(GetLogger(), message)
 
-#define LOG_AUTO_TRACEL(logger, message) \
-  blsb::TraceLogger auto_trace_logger__( \
+#define LOG_AUTO_TRACEL(logger, message)          \
+  blsb::logging::TraceLogger auto_trace_logger__( \
       logger, message, __FILE__, __LINE__, BOOST_CURRENT_FUNCTION);
 #define LOG_AUTO_TRACE() LOG_AUTO_TRACEL(GetLogger(), BOOST_CURRENT_FUNCTION);
 
