@@ -52,6 +52,10 @@ This will allow to perform some code checks locally before posting changes to se
 
 `sudo apt-get install pylint`
 
+##Install cpplint - c++ style checker
+
+`sudo pip install cpplint`
+
 ##Build
 
 In the project root call
