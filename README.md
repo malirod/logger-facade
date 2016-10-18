@@ -68,8 +68,74 @@ Use '--init' flag during build to prepare for execution. E.g.
 
 This will copy default config to the project root.
 
+###Build with sanitizers (clang)
+
+Use the following option for configuration `--sanitize`. Applicable to debug build only. Known values are:
+
+- `asan`: address
+- `tsan`: thread
+- `msan`: memory
+- `ubsan`: undefined behaviour
+
+Example
+
+```
+CXX=clang++ ./waf configure --sanitize=asan
+./waf build_debug -v
+ASAN_OPTIONS="detect_leaks=1" ./build/debug/testrunner
+```
+
 ##Run
 
 Run from project root. It's expected that config is located in the project root.
 
 `build/debug/testrunner`
+
+##Basic usage
+
+###Init logging and log with global logger
+
+```
+#include "logger.h"
+
+DECLARE_GLOBAL_GET_LOGGER("Logger.Global")
+
+int main(int argc, char** argv) {
+  INIT_LOGGER("logger.cfg");
+
+  LOG_TRACE("Trace global line");
+  LOG_DEBUG("Debug global line");
+  LOG_INFO("Info global line");
+  LOG_WARN("Warn global line");
+  LOG_ERROR("Error global line");
+  LOG_FATAL("Fatal global line");
+}
+```
+###Class logger and traces
+
+```
+namespace Foo {
+class Bar {
+ public:
+  DECLARE_GET_LOGGER("Foo.Bar")
+
+  void OutputTestLogLines() {
+    LOG_TRACE("Trace class line");
+    LOG_DEBUG("Debug class line");
+    LOG_INFO("Info class line");
+    LOG_WARN("Warn class line");
+    LOG_ERROR("Error class line");
+    LOG_FATAL("Fatal class line");
+  }
+
+  void OutputAutoTrace() {
+    LOG_AUTO_TRACE();
+    LOG_TRACE("Method with auto trace");
+  }
+};
+}  // namespace Foo
+```
+
+###Configuration
+
+Config file is expected to be present in current working directory. Sample config can be found in `/infrastructure/config/logger.cfg`
