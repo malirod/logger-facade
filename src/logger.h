@@ -26,6 +26,7 @@
       << boost::log::add_value("Function", function) << message
 
 namespace blsb {
+namespace logging {
 
 LOGGER_CLASS_TYPE create_logger(const char* name);
 
@@ -72,16 +73,18 @@ class TraceLogger {
 class LogManager {
  public:
   explicit LogManager(const char* config_file_path);
+  explicit LogManager(std::istream& log_config);
   ~LogManager();
 
   LogManager(const LogManager&) = delete;
   LogManager& operator=(const LogManager&) = delete;
 };
 
+}  // namespace logging
 }  // namespace blsb
 
 #define INIT_LOGGER(log_config_path) \
-  blsb::LogManager log_manager__(log_config_path)
+  blsb::logging::LogManager log_manager__(log_config_path)
 
 #define BLSB_LOG(logger, severity, message) \
   BLSB_LOG_SCOPE(                           \
@@ -106,10 +109,10 @@ class LogManager {
 #define LOG_FATALL(logger, message) \
   BLSB_LOG(logger, LOGGER_SEVERITY_TYPE_FATAL, message)
 
-#define DECLARE_GET_LOGGER(logger_name)                    \
-  LOGGER_CLASS_TYPE& GetLogger() {                         \
-    static auto logger = blsb::create_logger(logger_name); \
-    return logger;                                         \
+#define DECLARE_GET_LOGGER(logger_name)                             \
+  LOGGER_CLASS_TYPE& GetLogger() {                                  \
+    static auto logger = blsb::logging::create_logger(logger_name); \
+    return logger;                                                  \
   }
 
 #define DECLARE_GLOBAL_GET_LOGGER(logger_name) \
@@ -130,8 +133,8 @@ class LogManager {
 #define LOG_ERROR(message) LOG_ERRORL(GetLogger(), message)
 #define LOG_FATAL(message) LOG_FATALL(GetLogger(), message)
 
-#define LOG_AUTO_TRACEL(logger, message) \
-  blsb::TraceLogger auto_trace_logger__( \
+#define LOG_AUTO_TRACEL(logger, message)          \
+  blsb::logging::TraceLogger auto_trace_logger__( \
       logger, message, __FILE__, __LINE__, BOOST_CURRENT_FUNCTION);
 #define LOG_AUTO_TRACE() LOG_AUTO_TRACEL(GetLogger(), BOOST_CURRENT_FUNCTION);
 
