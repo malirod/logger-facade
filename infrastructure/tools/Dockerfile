@@ -12,7 +12,7 @@ WORKDIR $HOME
 
 RUN apt-get update
 RUN apt-get install -y git
-RUN apt-get install -y clang clang-format
+RUN apt-get install -y clang clang-format g++
 RUN apt-get install -y pylint
 
 RUN git clone https://github.com/malirod/boost-bin.git $BOOST_BIN
