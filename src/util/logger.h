@@ -1,6 +1,6 @@
-#pragma once
+// Copyright [2016] <Malinovsky Rodion>
 
-#include <string>
+#pragma once
 
 #define DOWHILE_NOTHING() \
   do {                    \
@@ -11,6 +11,8 @@
 #include <boost/log/core/core.hpp>
 #include <boost/log/sources/severity_logger.hpp>
 #include <boost/log/utility/manipulators/add_value.hpp>
+#include <string>
+#include <utility>
 
 #define BLSB_LOG_SCOPE(logger, severity, line, file, function, message) \
   BOOST_LOG_SEV(logger, severity)                                       \
@@ -94,7 +96,7 @@ class LogManager {
 
 }  // namespace logging
 }  // namespace util
-}  // namespace prj-demo
+}  // namespace prj_demo
 
 #define INIT_LOGGER(log_config_path) \
   prj_demo::util::logging::LogManager log_manager__(log_config_path)

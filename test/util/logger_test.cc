@@ -1,4 +1,6 @@
-#include "logger.h"
+// Copyright [2016] <Malinovsky Rodion>
+
+#include "util/logger.h"
 #include <boost/log/attributes/named_scope.hpp>
 #include <cstdio>
 #include <fstream>
@@ -23,7 +25,7 @@ bool Contains(const std::string& str, const std::string& substr) {
   return str.find(substr) != std::string::npos;
 }
 
-const std::string kLogConfigTemplate = R"(
+const char* kLogConfigTemplate = R"(
 [Core]
 DisableLogging="false"
 

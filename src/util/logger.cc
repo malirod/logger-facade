@@ -1,4 +1,6 @@
-#include "logger.h"
+// Copyright [2016] <Malinovsky Rodion>
+
+#include "util/logger.h"
 #if !defined(DISABLE_LOGGER)
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/log/attributes/constant.hpp>
@@ -9,6 +11,7 @@
 #include <boost/log/utility/setup/formatter_parser.hpp>
 #include <boost/log/utility/setup/from_stream.hpp>
 #include <fstream>
+#include <vector>
 
 namespace {
 
