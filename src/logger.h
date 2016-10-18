@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #define DOWHILE_NOTHING() \
   do {                    \
   } while (0)
@@ -16,7 +18,8 @@
       << boost::log::add_value("File", file)                            \
       << boost::log::add_value("Function", function) << message
 
-namespace blsb {
+namespace prj_demo {
+namespace util {
 namespace logging {
 
 enum SeverityLevel { lvlTRACE, lvlDEBUG, lvlINFO, lvlWARN, lvlERROR, lvlFATAL };
@@ -31,7 +34,7 @@ template <typename CharT, typename TraitsT>
 std::basic_istream<CharT, TraitsT>& operator>>(
     std::basic_istream<CharT, TraitsT>& strm, SeverityLevel& lvl);
 
-LoggerClassType create_logger(const char* name);
+LoggerClassType CreateLogger(const char* name);
 
 class TraceLogger {
  public:
@@ -49,7 +52,7 @@ class TraceLogger {
       , line_(line)
       , function_(function) {
     BLSB_LOG_SCOPE(logger_,
-                   blsb::logging::lvlTRACE,
+                   prj_demo::util::logging::lvlTRACE,
                    line_,
                    file_,
                    function_,
@@ -58,7 +61,7 @@ class TraceLogger {
 
   ~TraceLogger() {
     BLSB_LOG_SCOPE(logger_,
-                   blsb::logging::lvlTRACE,
+                   prj_demo::util::logging::lvlTRACE,
                    line_,
                    file_,
                    function_,
@@ -76,18 +79,27 @@ class TraceLogger {
 class LogManager {
  public:
   explicit LogManager(const char* config_file_path);
-  explicit LogManager(std::istream& log_config);
+
+  explicit LogManager(const std::string& log_config);
+
   ~LogManager();
+
+  static void Flush();
+
+  static void Shutdown();
 
   LogManager(const LogManager&) = delete;
   LogManager& operator=(const LogManager&) = delete;
 };
 
 }  // namespace logging
-}  // namespace blsb
+}  // namespace util
+}  // namespace prj-demo
 
 #define INIT_LOGGER(log_config_path) \
-  blsb::logging::LogManager log_manager__(log_config_path)
+  prj_demo::util::logging::LogManager log_manager__(log_config_path)
+
+#define FLUSH_LOGGER() prj_demo::util::logging::LogManager::Flush();
 
 #define BLSB_LOG(logger, severity, message) \
   BLSB_LOG_SCOPE(                           \
@@ -98,24 +110,24 @@ class LogManager {
 #define LOG_DEBUGL(logger, message) DOWHILE_NOTHING()
 #else  // CUT_OFF_DEBUG_LOG
 #define LOG_TRACEL(logger, message) \
-  BLSB_LOG(logger, blsb::logging::lvlTRACE, message)
+  BLSB_LOG(logger, prj_demo::util::logging::lvlTRACE, message)
 #define LOG_DEBUGL(logger, message) \
-  BLSB_LOG(logger, blsb::logging::lvlDEBUG, message)
+  BLSB_LOG(logger, prj_demo::util::logging::lvlDEBUG, message)
 #endif  // CUT_OFF_DEBUG_LOG
 
 #define LOG_INFOL(logger, message) \
-  BLSB_LOG(logger, blsb::logging::lvlINFO, message)
+  BLSB_LOG(logger, prj_demo::util::logging::lvlINFO, message)
 #define LOG_WARNL(logger, message) \
-  BLSB_LOG(logger, blsb::logging::lvlWARN, message)
+  BLSB_LOG(logger, prj_demo::util::logging::lvlWARN, message)
 #define LOG_ERRORL(logger, message) \
-  BLSB_LOG(logger, blsb::logging::lvlERROR, message)
+  BLSB_LOG(logger, prj_demo::util::logging::lvlERROR, message)
 #define LOG_FATALL(logger, message) \
-  BLSB_LOG(logger, blsb::logging::lvlFATAL, message)
+  BLSB_LOG(logger, prj_demo::util::logging::lvlFATAL, message)
 
-#define DECLARE_GET_LOGGER(logger_name)                             \
-  blsb::logging::LoggerClassType& GetLogger() {                     \
-    static auto logger = blsb::logging::create_logger(logger_name); \
-    return logger;                                                  \
+#define DECLARE_GET_LOGGER(logger_name)                                      \
+  prj_demo::util::logging::LoggerClassType& GetLogger() {                    \
+    static auto logger = prj_demo::util::logging::CreateLogger(logger_name); \
+    return logger;                                                           \
   }
 
 #define DECLARE_GLOBAL_GET_LOGGER(logger_name) \
@@ -136,14 +148,15 @@ class LogManager {
 #define LOG_ERROR(message) LOG_ERRORL(GetLogger(), message)
 #define LOG_FATAL(message) LOG_FATALL(GetLogger(), message)
 
-#define LOG_AUTO_TRACEL(logger, message)          \
-  blsb::logging::TraceLogger auto_trace_logger__( \
+#define LOG_AUTO_TRACEL(logger, message)                    \
+  prj_demo::util::logging::TraceLogger auto_trace_logger__( \
       logger, message, __FILE__, __LINE__, BOOST_CURRENT_FUNCTION);
 #define LOG_AUTO_TRACE() LOG_AUTO_TRACEL(GetLogger(), BOOST_CURRENT_FUNCTION);
 
 #else  // DISABLE_LOGGER
 
 #define INIT_LOGGER(log_config_path) DOWHILE_NOTHING()
+#define FLUSH_LOGGER() DOWHILE_NOTHING()
 
 #define BLSB_LOG(logger, severity, message) DOWHILE_NOTHING()
 

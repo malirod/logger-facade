@@ -17,7 +17,7 @@ const std::vector<std::string> kSeverityLevelNames = {
 
 const auto kSeverityLevelMaxNameSize = 5;
 
-const char* to_string(blsb::logging::SeverityLevel lvl) {
+const char* ToString(prj_demo::util::logging::SeverityLevel lvl) {
   const auto names_count = kSeverityLevelNames.size();
   const auto integral_lvl = static_cast<std::size_t>(lvl);
   if (integral_lvl < names_count) {
@@ -30,10 +30,10 @@ const char* to_string(blsb::logging::SeverityLevel lvl) {
 }  // namespace
 
 template <typename CharT, typename TraitsT>
-std::basic_ostream<CharT, TraitsT>& blsb::logging::operator<<(
+std::basic_ostream<CharT, TraitsT>& prj_demo::util::logging::operator<<(
     std::basic_ostream<CharT, TraitsT>& strm,
-    blsb::logging::SeverityLevel lvl) {
-  const char* lvl_str = to_string(lvl);
+    prj_demo::util::logging::SeverityLevel lvl) {
+  const char* lvl_str = ToString(lvl);
   if (lvl_str) {
     strm << std::setw(kSeverityLevelMaxNameSize) << lvl_str;
   } else {
@@ -43,16 +43,16 @@ std::basic_ostream<CharT, TraitsT>& blsb::logging::operator<<(
 }
 
 template <typename CharT, typename TraitsT>
-std::basic_istream<CharT, TraitsT>& blsb::logging::operator>>(
+std::basic_istream<CharT, TraitsT>& prj_demo::util::logging::operator>>(
     std::basic_istream<CharT, TraitsT>& strm,
-    blsb::logging::SeverityLevel& lvl) {
+    prj_demo::util::logging::SeverityLevel& lvl) {
   if (strm.good()) {
     const auto names_count = kSeverityLevelNames.size();
     std::string str;
     strm >> str;
     for (std::size_t i = 0; i < names_count; ++i) {
       if (str == kSeverityLevelNames[i]) {
-        lvl = static_cast<blsb::logging::SeverityLevel>(i);
+        lvl = static_cast<prj_demo::util::logging::SeverityLevel>(i);
         return strm;
       }
     }
@@ -85,12 +85,14 @@ class TimeStampFormatterFactory
   }
 };
 
-void init_logging(std::istream& log_config) {
-  boost::log::register_simple_formatter_factory<blsb::logging::SeverityLevel,
-                                                char>("Severity");
+void InitLogging(std::istream& log_config) {
+  boost::log::register_simple_formatter_factory<
+      prj_demo::util::logging::SeverityLevel,
+      char>("Severity");
 
-  boost::log::register_simple_filter_factory<blsb::logging::SeverityLevel,
-                                             char>("Severity");
+  boost::log::register_simple_filter_factory<
+      prj_demo::util::logging::SeverityLevel,
+      char>("Severity");
 
   boost::log::register_formatter_factory(
       "TimeStamp", boost::make_shared<TimeStampFormatterFactory>());
@@ -100,34 +102,40 @@ void init_logging(std::istream& log_config) {
   boost::log::init_from_stream(log_config);
 }
 
-void deinit_logging() {
-  boost::log::core::get()->flush();
-  boost::log::core::get()->remove_all_sinks();
-}
-
 }  // namespace
 
-blsb::logging::LoggerClassType blsb::logging::create_logger(const char* name) {
-  blsb::logging::LoggerClassType logger;
+prj_demo::util::logging::LoggerClassType prj_demo::util::logging::CreateLogger(
+    const char* name) {
+  prj_demo::util::logging::LoggerClassType logger;
   logger.add_attribute("Name",
                        boost::log::attributes::constant<std::string>(name));
   return logger;
 }
 
-blsb::logging::LogManager::LogManager(const char* config_file_path) {
+prj_demo::util::logging::LogManager::LogManager(const char* config_file_path) {
   std::ifstream log_config(config_file_path);
   if (!log_config.is_open()) {
     return;
   }
-  init_logging(log_config);
+  InitLogging(log_config);
 }
 
-blsb::logging::LogManager::LogManager(std::istream& log_config) {
-  init_logging(log_config);
+prj_demo::util::logging::LogManager::LogManager(const std::string& log_config) {
+  std::stringstream sstream(log_config);
+  InitLogging(sstream);
 }
 
-blsb::logging::LogManager::~LogManager() {
-  deinit_logging();
+prj_demo::util::logging::LogManager::~LogManager() {
+  Shutdown();
+}
+
+void prj_demo::util::logging::LogManager::Shutdown() {
+  Flush();
+  boost::log::core::get()->remove_all_sinks();
+}
+
+void prj_demo::util::logging::LogManager::Flush() {
+  boost::log::core::get()->flush();
 }
 
 #endif  // DISABLE_LOGGER
