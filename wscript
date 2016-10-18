@@ -47,7 +47,8 @@ def configure(conf):
 def post_build(bld):
     if bld.options.init:
         print 'Post build step: copy logging config to the project root'
-        source_cfg = os.path.join(bld.path.abspath(), 'config', 'logger.cfg')
+        source_cfg = os.path.join(
+            bld.path.abspath(), 'infrastructure', 'config', 'logger.cfg')
         shutil.copy(source_cfg, bld.path.abspath())
 
 

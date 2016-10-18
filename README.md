@@ -44,7 +44,7 @@ Restart terminal, or reload config with `source ~/.profile` (`source ~/.bashrc`)
 
 ##Setup git hook
 
-Run `python tools/infrastructure/install_hooks.py`
+Run `python infrastructure/tools/install_hooks.py`
 
 This will allow to perform some code checks locally before posting changes to server.
 

@@ -35,5 +35,5 @@ build/*
 *.lock-waf_*
 *.waf-*
 
-logger.cfg
-debug_*.log
+/logger.cfg
+/debug_*.log
