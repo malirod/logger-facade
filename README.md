@@ -54,7 +54,10 @@ This will allow to perform some code checks locally before posting changes to se
 
 ##Install cpplint - c++ style checker
 
-`sudo pip install cpplint`
+```
+sudo apt-get install python-pip
+sudo pip install cpplint
+```
 
 ##Build
 
