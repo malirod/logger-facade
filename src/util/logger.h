@@ -71,12 +71,12 @@ class TraceLogger {
   TraceLogger& operator=(const TraceLogger&) = delete;
 
   TraceLogger(LoggerClassType logger,
-              std::string message,
+              const std::string& message,
               const char* file,
               int line,
               char const* function)
       : logger_(std::move(logger))
-      , message_(std::move(message))
+      , message_(message)
       , file_(file)
       , line_(line)
       , function_(function) {
@@ -154,7 +154,7 @@ class LogManager {
   BLSB_LOG(logger, prj_demo::util::logging::lvlFATAL, message)
 
 #define DECLARE_GET_LOGGER(logger_name)                                      \
-  prj_demo::util::logging::LoggerClassType& GetLogger() {                    \
+  static prj_demo::util::logging::LoggerClassType& GetLogger() {             \
     static auto logger = prj_demo::util::logging::CreateLogger(logger_name); \
     return logger;                                                           \
   }
