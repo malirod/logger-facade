@@ -89,18 +89,9 @@ class TimeStampFormatterFactory
 };
 
 void InitLogging(std::istream& log_config) {
-  boost::log::register_simple_formatter_factory<
-      prj_demo::util::logging::SeverityLevel,
-      char>("Severity");
-
   boost::log::register_simple_filter_factory<
       prj_demo::util::logging::SeverityLevel,
       char>("Severity");
-
-  boost::log::register_formatter_factory(
-      "TimeStamp", boost::make_shared<TimeStampFormatterFactory>());
-
-  boost::log::add_common_attributes();
 
   boost::log::init_from_stream(log_config);
 }
@@ -108,10 +99,8 @@ void InitLogging(std::istream& log_config) {
 }  // namespace
 
 prj_demo::util::logging::LoggerClassType prj_demo::util::logging::CreateLogger(
-    const char* name) {
+    const char*) {
   prj_demo::util::logging::LoggerClassType logger;
-  logger.add_attribute("Name",
-                       boost::log::attributes::constant<std::string>(name));
   return logger;
 }
 

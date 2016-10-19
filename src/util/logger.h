@@ -42,12 +42,7 @@
 #include "boost/log/utility/manipulators/add_value.hpp"
 
 #define BLSB_LOG_SCOPE(logger, severity, line, file, function, message) \
-  do {                                                                  \
-    BOOST_LOG_SEV(logger, severity)                                     \
-        << boost::log::add_value("Line", line)                          \
-        << boost::log::add_value("File", file)                          \
-        << boost::log::add_value("Function", function) << message;      \
-  } while (0)
+  BOOST_LOG_SEV(logger, severity) << message;
 
 namespace prj_demo {
 namespace util {
