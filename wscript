@@ -56,7 +56,8 @@ def configure(conf):
     conf.env.CXXFLAGS += ['-g']
     conf.env.CXXFLAGS += ['-O0']
     # Add sanitizers if required
-    setup_sanitizer(conf)
+    if conf.options.sanitize:
+        setup_sanitizer(conf)
 
     # Setup release configuration
     conf.setenv('release')
@@ -83,7 +84,7 @@ def build(bld):
 
     bld_common_includes = ['src', 'thirdparty/gtest']
 
-    special_files = ['src/logger.cc']
+    special_files = ['src/util/logger.cc']
     special_target = 'special_objects'
 
     bld.objects(source=special_files[0],

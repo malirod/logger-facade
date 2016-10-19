@@ -120,4 +120,20 @@ fi
 
 echo -e "$TEXT_INFO" "PASSED" "$TEXT_DEFAULT"
 
+##################################################################
+### Auto-check cpp code with cpplint
+##################################################################
+
+echo -e "$TEXT_INFO" "Checking cpp style with cpplint" "$TEXT_DEFAULT"
+
+if [ -n "$CPP_FILES" ]; then
+    cpplint --recursive src/* test/* $CPP_FILES
+    if [ "$?" -ne "0" ]; then
+        echo -e "$TEXT_ERROR" "Cpplint reports about the issues in the cpp files" "$TEXT_DEFAULT"
+        exit 3
+    fi
+fi
+
+echo -e "$TEXT_INFO" "PASSED" "$TEXT_DEFAULT"
+
 exit 0
