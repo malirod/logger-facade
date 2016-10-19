@@ -3,6 +3,7 @@ import os
 CPP_FLAGS = [
     '-Wextra',
     '-DDEBUG',
+    '-DUSE_LOG4CPLUS_LOGGER',
     '-std=c++11',
     # ...and the same thing goes for the magic -x option which specifies the
     # language that the files to be compiled are written in. This is mostly
@@ -16,7 +17,8 @@ CPP_FLAGS = [
     '-Ithirdparty/gtest',
     '-Ithirdparty',
     '-I.',
-    '-I${BOOST_HOME}/include']
+    '-I${BOOST_HOME}/include',
+    '-I${LOG4CPLUS_HOME}/include']
 
 
 SOURCE_EXTENSIONS = ['.cpp', '.cxx', '.cc', '.c', '.m', '.mm']
