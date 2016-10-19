@@ -42,10 +42,12 @@
 #include "boost/log/utility/manipulators/add_value.hpp"
 
 #define BLSB_LOG_SCOPE(logger, severity, line, file, function, message) \
-  BOOST_LOG_SEV(logger, severity)                                       \
-      << boost::log::add_value("Line", line)                            \
-      << boost::log::add_value("File", file)                            \
-      << boost::log::add_value("Function", function) << message
+  do {                                                                  \
+    BOOST_LOG_SEV(logger, severity)                                     \
+        << boost::log::add_value("Line", line)                          \
+        << boost::log::add_value("File", file)                          \
+        << boost::log::add_value("Function", function) << message;      \
+  } while (0)
 
 namespace prj_demo {
 namespace util {
@@ -128,7 +130,7 @@ class LogManager {
 #define INIT_LOGGER(log_config_path) \
   prj_demo::util::logging::LogManager log_manager__(log_config_path)
 
-#define FLUSH_LOGGER() prj_demo::util::logging::LogManager::Flush();
+#define FLUSH_LOGGER() prj_demo::util::logging::LogManager::Flush()
 
 #define BLSB_LOG(logger, severity, message) \
   BLSB_LOG_SCOPE(                           \
@@ -180,6 +182,7 @@ class LogManager {
 #define LOG_AUTO_TRACEL(logger, message)                    \
   prj_demo::util::logging::TraceLogger auto_trace_logger__( \
       logger, message, __FILE__, __LINE__, BOOST_CURRENT_FUNCTION);
+
 #define LOG_AUTO_TRACE() LOG_AUTO_TRACEL(GetLogger(), BOOST_CURRENT_FUNCTION);
 
 #endif  // DISABLE_LOGGER
