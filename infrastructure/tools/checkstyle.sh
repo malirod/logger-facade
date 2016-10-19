@@ -113,7 +113,7 @@ PYTHON_FILES=$(git diff $COMMITS_RANGE --name-only --diff-filter=ACM | grep -e "
 if [ -n "$PYTHON_FILES" ]; then
     pylint --rcfile=.pylintrc $PYTHON_FILES
     if [ "$?" -ne "0" ]; then
-        echo -e "$TEXT_ERROR" "Pylint reports about the issues in the python scripts" "$TEXT_DEFAULT"
+        echo -e "$TEXT_ERROR" "Pylint reports about issues in python scripts" "$TEXT_DEFAULT"
         exit 3
     fi
 fi
@@ -129,7 +129,24 @@ echo -e "$TEXT_INFO" "Checking cpp style with cpplint" "$TEXT_DEFAULT"
 if [ -n "$CPP_FILES" ]; then
     cpplint --recursive src/* test/* $CPP_FILES
     if [ "$?" -ne "0" ]; then
-        echo -e "$TEXT_ERROR" "Cpplint reports about the issues in the cpp files" "$TEXT_DEFAULT"
+        echo -e "$TEXT_ERROR" "Cpplint reports about issues in cpp files" "$TEXT_DEFAULT"
+        exit 3
+    fi
+fi
+
+echo -e "$TEXT_INFO" "PASSED" "$TEXT_DEFAULT"
+
+##################################################################
+### Auto-check cpp code with cppcheck
+##################################################################
+
+echo -e "$TEXT_INFO" "Checking cpp code with cppcheck" "$TEXT_DEFAULT"
+
+if [ -n "$CPP_FILES" ]; then
+    infrastructure/tools/cppcheck/cppcheck --error-exitcode=1 --std=c++11 --std=posix --platform=unix64 --enable=all --inconclusive -Isrc $CPP_FILES
+
+    if [ "$?" -ne "0" ]; then
+        echo -e "$TEXT_ERROR" "Cppcheck reports about issues in cpp files" "$TEXT_DEFAULT"
         exit 3
     fi
 fi

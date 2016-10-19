@@ -6,7 +6,34 @@
   do {                    \
   } while (0)
 
-#if !defined(DISABLE_LOGGER)
+#if defined(DISABLE_LOGGER)
+
+#define INIT_LOGGER(log_config_path) DOWHILE_NOTHING()
+#define FLUSH_LOGGER() DOWHILE_NOTHING()
+
+#define BLSB_LOG(logger, severity, message) DOWHILE_NOTHING()
+
+#define LOG_TRACEL(logger, message) DOWHILE_NOTHING()
+#define LOG_DEBUGL(logger, message) DOWHILE_NOTHING()
+#define LOG_INFOL(logger, message) DOWHILE_NOTHING()
+#define LOG_WARNL(logger, message) DOWHILE_NOTHING()
+#define LOG_ERRORL(logger, message) DOWHILE_NOTHING()
+#define LOG_FATALL(logger, message) DOWHILE_NOTHING()
+
+#define DECLARE_GET_LOGGER(logger_name)
+#define DECLARE_GLOBAL_GET_LOGGER(logger_name)
+
+#define LOG_TRACE(message) DOWHILE_NOTHING()
+#define LOG_DEBUG(message) DOWHILE_NOTHING()
+#define LOG_INFO(message) DOWHILE_NOTHING()
+#define LOG_WARN(message) DOWHILE_NOTHING()
+#define LOG_ERROR(message) DOWHILE_NOTHING()
+#define LOG_FATAL(message) DOWHILE_NOTHING()
+
+#define LOG_AUTO_TRACEL(logger, message) DOWHILE_NOTHING()
+#define LOG_AUTO_TRACE() DOWHILE_NOTHING()
+
+#else  // DISABLE_LOGGER
 
 #include <string>
 #include <utility>
@@ -15,10 +42,12 @@
 #include "boost/log/utility/manipulators/add_value.hpp"
 
 #define BLSB_LOG_SCOPE(logger, severity, line, file, function, message) \
-  BOOST_LOG_SEV(logger, severity)                                       \
-      << boost::log::add_value("Line", line)                            \
-      << boost::log::add_value("File", file)                            \
-      << boost::log::add_value("Function", function) << message
+  do {                                                                  \
+    BOOST_LOG_SEV(logger, severity)                                     \
+        << boost::log::add_value("Line", line)                          \
+        << boost::log::add_value("File", file)                          \
+        << boost::log::add_value("Function", function) << message;      \
+  } while (0)
 
 namespace prj_demo {
 namespace util {
@@ -44,12 +73,12 @@ class TraceLogger {
   TraceLogger& operator=(const TraceLogger&) = delete;
 
   TraceLogger(LoggerClassType logger,
-              std::string message,
+              const std::string& message,
               const char* file,
               int line,
               char const* function)
       : logger_(std::move(logger))
-      , message_(std::move(message))
+      , message_(message)
       , file_(file)
       , line_(line)
       , function_(function) {
@@ -101,7 +130,7 @@ class LogManager {
 #define INIT_LOGGER(log_config_path) \
   prj_demo::util::logging::LogManager log_manager__(log_config_path)
 
-#define FLUSH_LOGGER() prj_demo::util::logging::LogManager::Flush();
+#define FLUSH_LOGGER() prj_demo::util::logging::LogManager::Flush()
 
 #define BLSB_LOG(logger, severity, message) \
   BLSB_LOG_SCOPE(                           \
@@ -127,7 +156,7 @@ class LogManager {
   BLSB_LOG(logger, prj_demo::util::logging::lvlFATAL, message)
 
 #define DECLARE_GET_LOGGER(logger_name)                                      \
-  prj_demo::util::logging::LoggerClassType& GetLogger() {                    \
+  static prj_demo::util::logging::LoggerClassType& GetLogger() {             \
     static auto logger = prj_demo::util::logging::CreateLogger(logger_name); \
     return logger;                                                           \
   }
@@ -153,33 +182,7 @@ class LogManager {
 #define LOG_AUTO_TRACEL(logger, message)                    \
   prj_demo::util::logging::TraceLogger auto_trace_logger__( \
       logger, message, __FILE__, __LINE__, BOOST_CURRENT_FUNCTION);
+
 #define LOG_AUTO_TRACE() LOG_AUTO_TRACEL(GetLogger(), BOOST_CURRENT_FUNCTION);
-
-#else  // DISABLE_LOGGER
-
-#define INIT_LOGGER(log_config_path) DOWHILE_NOTHING()
-#define FLUSH_LOGGER() DOWHILE_NOTHING()
-
-#define BLSB_LOG(logger, severity, message) DOWHILE_NOTHING()
-
-#define LOG_TRACEL(logger, message) DOWHILE_NOTHING()
-#define LOG_DEBUGL(logger, message) DOWHILE_NOTHING()
-#define LOG_INFOL(logger, message) DOWHILE_NOTHING()
-#define LOG_WARNL(logger, message) DOWHILE_NOTHING()
-#define LOG_ERRORL(logger, message) DOWHILE_NOTHING()
-#define LOG_FATALL(logger, message) DOWHILE_NOTHING()
-
-#define DECLARE_GET_LOGGER(logger_name)
-#define DECLARE_GLOBAL_GET_LOGGER(logger_name)
-
-#define LOG_TRACE(message) DOWHILE_NOTHING()
-#define LOG_DEBUG(message) DOWHILE_NOTHING()
-#define LOG_INFO(message) DOWHILE_NOTHING()
-#define LOG_WARN(message) DOWHILE_NOTHING()
-#define LOG_ERROR(message) DOWHILE_NOTHING()
-#define LOG_FATAL(message) DOWHILE_NOTHING()
-
-#define LOG_AUTO_TRACEL(logger, message) DOWHILE_NOTHING()
-#define LOG_AUTO_TRACE() DOWHILE_NOTHING()
 
 #endif  // DISABLE_LOGGER

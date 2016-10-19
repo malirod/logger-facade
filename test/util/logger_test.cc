@@ -96,7 +96,7 @@ class Bar {
  public:
   DECLARE_GET_LOGGER("Foo.Bar")
 
-  void OutputTestLogLines() {
+  static void OutputTestLogLines() {
     LOG_TRACE("Trace class line");
     LOG_DEBUG("Debug class line");
     LOG_INFO("Info class line");
@@ -105,7 +105,7 @@ class Bar {
     LOG_FATAL("Fatal class line");
   }
 
-  void OutputAutoTrace() {
+  static void OutputAutoTrace() {
     LOG_AUTO_TRACE();
     LOG_TRACE("Method with auto trace");
   }
