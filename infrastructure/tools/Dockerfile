@@ -12,6 +12,10 @@ WORKDIR $HOME
 
 RUN apt-get update
 RUN apt-get install -y git
+RUN apt-get install -y clang clang-format g++
+RUN apt-get install -y pylint
+RUN apt-get install -y python-pip
+RUN pip install cpplint
 
 RUN git clone https://github.com/malirod/boost-bin.git $BOOST_BIN
 WORKDIR $BOOST_BIN
@@ -20,8 +24,3 @@ RUN git checkout ${BOOST_BRANCH}
 RUN tar -xzf build.tar.gz
 
 WORKDIR $PROJECT_ROOT
-RUN apt-get install -y clang clang-format
-RUN CXX=clang++ ./waf configure build_debug build_release
-
-RUN apt-get install -y python-pip
-RUN pip install flake8

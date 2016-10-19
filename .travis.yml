@@ -5,9 +5,36 @@ language: cpp
 services:
   - docker
 
+branches:
+  only:
+    - master
+    - develop
+
 before_install:
-  - docker build -t travis-build -f tools/infrastructure/Dockerfile .
+  - docker build -t travis-build -f infrastructure/tools/Dockerfile .
 
 script:
-  - docker run travis-build tools/infrastructure/checkstyle.sh $TRAVIS_COMMIT_RANGE
+  # Common style check
+  - docker run travis-build infrastructure/tools/checkstyle.sh $TRAVIS_COMMIT_RANGE
+  # Clang, build debug and release witn logger, run debug tests
+  - docker run travis-build /bin/bash -c "CXX=clang++ ./waf configure build_debug --init build_release"
+  - docker commit $(docker ps -l -q) travis-build
+  - docker run travis-build build/debug/testrunner
+  # Clang, build debug and release without logger, run debug tests
+  - docker run travis-build /bin/bash -c "./waf clean_debug clean_release"
+  - docker commit $(docker ps -l -q) travis-build
+  - docker run travis-build /bin/bash -c "CXXFLAGS=-DDISABLE_LOGGER CXX=clang++ ./waf configure build_debug --init build_release"
+  - docker commit $(docker ps -l -q) travis-build
+  - docker run travis-build build/debug/testrunner
+  # GCC, build debug and release with logger, run debug tests
+  - docker run travis-build /bin/bash -c "./waf clean_debug clean_release"
+  - docker commit $(docker ps -l -q) travis-build
+  - docker run travis-build /bin/bash -c "CXX=g++ ./waf configure build_debug --init build_release"
+  - docker commit $(docker ps -l -q) travis-build
+  - docker run travis-build build/debug/testrunner
+  # GCC, build debug and release without logger, run debug tests
+  - docker run travis-build /bin/bash -c "./waf clean_debug clean_release"
+  - docker commit $(docker ps -l -q) travis-build
+  - docker run travis-build /bin/bash -c "CXXFLAGS=-DDISABLE_LOGGER CXX=g++ ./waf configure build_debug --init build_release"
+  - docker commit $(docker ps -l -q) travis-build
   - docker run travis-build build/debug/testrunner
