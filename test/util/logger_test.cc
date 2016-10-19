@@ -1,7 +1,6 @@
 // Copyright [2016] <Malinovsky Rodion>
 
 #include "util/logger.h"
-#include <boost/log/attributes/named_scope.hpp>
 #include <cstdio>
 #include <fstream>
 #include "gtest/gtest.h"

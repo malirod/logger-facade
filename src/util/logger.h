@@ -8,11 +8,11 @@
 
 #if !defined(DISABLE_LOGGER)
 
-#include <boost/log/core/core.hpp>
-#include <boost/log/sources/severity_logger.hpp>
-#include <boost/log/utility/manipulators/add_value.hpp>
 #include <string>
 #include <utility>
+#include "boost/log/core/core.hpp"
+#include "boost/log/sources/severity_logger.hpp"
+#include "boost/log/utility/manipulators/add_value.hpp"
 
 #define BLSB_LOG_SCOPE(logger, severity, line, file, function, message) \
   BOOST_LOG_SEV(logger, severity)                                       \

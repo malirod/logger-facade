@@ -1,3 +1,5 @@
+// Copyright [2016] <Malinovsky Rodion>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "util/logger.h"
