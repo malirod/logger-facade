@@ -88,9 +88,11 @@ def configure(ctx):
     ctx.env.CXXFLAGS += ['-O3']
 
     if ctx.options.init:
-        source_cfg = os.path.join(
-            ctx.path.abspath(), 'infrastructure', 'config', 'logger.cfg')
-        shutil.copy(source_cfg, ctx.path.abspath())
+        if ctx.options.logger != 'none':
+            src_cfg = os.path.join(
+                ctx.path.abspath(), 'infrastructure', 'config', 'logger.cfg')
+            shutil.copyfile('{}.{}'.format(src_cfg, ctx.options.logger),
+                            os.path.join(ctx.path.abspath(), 'logger.cfg'))
 
 
 def post_build(dummy_ctx):
