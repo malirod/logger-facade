@@ -1,7 +1,10 @@
 // Copyright [2016] <Malinovsky Rodion>
 
 #include "util/logger.h"
-#if !defined(DISABLE_LOGGER)
+#if defined(DISABLE_LOGGER)
+
+#elif defined(USE_BOOST_LOGGER)
+
 #include <fstream>
 #include <vector>
 #include "boost/date_time/posix_time/posix_time.hpp"
@@ -20,7 +23,7 @@ const std::vector<std::string> kSeverityLevelNames = {
 
 const auto kSeverityLevelMaxNameSize = 5;
 
-const char* ToString(prj_demo::util::logging::SeverityLevel lvl) {
+const char* ToString(IMPL_LOGGER_NAMESPACE_::SeverityLevel lvl) {
   const auto names_count = kSeverityLevelNames.size();
   const auto integral_lvl = static_cast<std::size_t>(lvl);
   if (integral_lvl < names_count) {
@@ -33,9 +36,9 @@ const char* ToString(prj_demo::util::logging::SeverityLevel lvl) {
 }  // namespace
 
 template <typename CharT, typename TraitsT>
-std::basic_ostream<CharT, TraitsT>& prj_demo::util::logging::operator<<(
+std::basic_ostream<CharT, TraitsT>& IMPL_LOGGER_NAMESPACE_::operator<<(
     std::basic_ostream<CharT, TraitsT>& strm,
-    prj_demo::util::logging::SeverityLevel lvl) {
+    IMPL_LOGGER_NAMESPACE_::SeverityLevel lvl) {
   const char* lvl_str = ToString(lvl);
   if (lvl_str) {
     strm << std::setw(kSeverityLevelMaxNameSize) << lvl_str;
@@ -46,16 +49,16 @@ std::basic_ostream<CharT, TraitsT>& prj_demo::util::logging::operator<<(
 }
 
 template <typename CharT, typename TraitsT>
-std::basic_istream<CharT, TraitsT>& prj_demo::util::logging::operator>>(
+std::basic_istream<CharT, TraitsT>& IMPL_LOGGER_NAMESPACE_::operator>>(
     std::basic_istream<CharT, TraitsT>& strm,
-    prj_demo::util::logging::SeverityLevel& lvl) {
+    IMPL_LOGGER_NAMESPACE_::SeverityLevel& lvl) {
   if (strm.good()) {
     const auto names_count = kSeverityLevelNames.size();
     std::string str;
     strm >> str;
     for (std::size_t i = 0; i < names_count; ++i) {
       if (str == kSeverityLevelNames[i]) {
-        lvl = static_cast<prj_demo::util::logging::SeverityLevel>(i);
+        lvl = static_cast<IMPL_LOGGER_NAMESPACE_::SeverityLevel>(i);
         return strm;
       }
     }
@@ -90,11 +93,11 @@ class TimeStampFormatterFactory
 
 void InitLogging(std::istream& log_config) {
   boost::log::register_simple_formatter_factory<
-      prj_demo::util::logging::SeverityLevel,
+      IMPL_LOGGER_NAMESPACE_::SeverityLevel,
       char>("Severity");
 
   boost::log::register_simple_filter_factory<
-      prj_demo::util::logging::SeverityLevel,
+      IMPL_LOGGER_NAMESPACE_::SeverityLevel,
       char>("Severity");
 
   boost::log::register_formatter_factory(
@@ -107,15 +110,14 @@ void InitLogging(std::istream& log_config) {
 
 }  // namespace
 
-prj_demo::util::logging::LoggerClassType prj_demo::util::logging::CreateLogger(
-    const char* name) {
-  prj_demo::util::logging::LoggerClassType logger;
+IMPL_LOGGER_CLASS_TYPE_ IMPL_LOGGER_NAMESPACE_::CreateLogger(const char* name) {
+  IMPL_LOGGER_CLASS_TYPE_ logger;
   logger.add_attribute("Name",
                        boost::log::attributes::constant<std::string>(name));
   return logger;
 }
 
-prj_demo::util::logging::LogManager::LogManager(const char* config_file_path) {
+IMPL_LOGGER_NAMESPACE_::LogManager::LogManager(const char* config_file_path) {
   std::ifstream log_config(config_file_path);
   if (!log_config.is_open()) {
     return;
@@ -123,22 +125,59 @@ prj_demo::util::logging::LogManager::LogManager(const char* config_file_path) {
   InitLogging(log_config);
 }
 
-prj_demo::util::logging::LogManager::LogManager(const std::string& log_config) {
-  std::stringstream sstream(log_config);
-  InitLogging(sstream);
+IMPL_LOGGER_NAMESPACE_::LogManager::LogManager(std::istream& log_config) {
+  InitLogging(log_config);
 }
 
-prj_demo::util::logging::LogManager::~LogManager() {
+IMPL_LOGGER_NAMESPACE_::LogManager::~LogManager() {
   Shutdown();
 }
 
-void prj_demo::util::logging::LogManager::Shutdown() {
-  Flush();
+void IMPL_LOGGER_NAMESPACE_::LogManager::Shutdown() {
+  boost::log::core::get()->flush();
   boost::log::core::get()->remove_all_sinks();
 }
 
-void prj_demo::util::logging::LogManager::Flush() {
-  boost::log::core::get()->flush();
+#elif defined(USE_LOG4CPLUS_LOGGER)
+
+#include <fstream>
+#include <vector>
+#include "log4cplus/configurator.h"
+
+namespace {
+
+void InitLogging(std::istream& log_config) {
+  log4cplus::initialize();
+
+  // this will set def log level to DEBUG
+  log4cplus::BasicConfigurator::doConfigure();
+
+  log4cplus::Logger::getRoot().setLogLevel(log4cplus::INFO_LOG_LEVEL);
+
+  log4cplus::PropertyConfigurator configurator(log_config);
+  configurator.configure();
 }
 
-#endif  // DISABLE_LOGGER
+}  // namespace
+
+IMPL_LOGGER_NAMESPACE_::LogManager::LogManager(const char* config_file_path) {
+  std::ifstream log_config(config_file_path);
+  if (!log_config.is_open()) {
+    return;
+  }
+  InitLogging(log_config);
+}
+
+IMPL_LOGGER_NAMESPACE_::LogManager::LogManager(std::istream& log_config) {
+  InitLogging(log_config);
+}
+
+IMPL_LOGGER_NAMESPACE_::LogManager::~LogManager() {
+  Shutdown();
+}
+
+void IMPL_LOGGER_NAMESPACE_::LogManager::Shutdown() {
+  log4cplus::Logger::shutdown();
+}
+
+#endif
