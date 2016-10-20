@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/malirod/logger-facade-log.svg?branch=master)](https://travis-ci.org/malirod/logger-facade)
+[![Build Status](https://travis-ci.org/malirod/logger-facade.svg?branch=master)](https://travis-ci.org/malirod/logger-facade)
 
 # logger-facade
 Allows to switch between different loggers keeping the same interface. Supported log4cplus and Boost Log
