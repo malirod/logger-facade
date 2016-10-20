@@ -1,7 +1,7 @@
-[![Build Status](https://travis-ci.org/malirod/boost-log.svg?branch=master)](https://travis-ci.org/malirod/boost-log)
+[![Build Status](https://travis-ci.org/malirod/logger-facade-log.svg?branch=master)](https://travis-ci.org/malirod/logger-facade)
 
-# boost-log
-Boost logger sample
+# logger-facade
+Allows to switch between different loggers keeping the same interface. Supported log4cplus and Boost Log
 
 ##Platform
 
@@ -42,6 +42,27 @@ Set env pointing to the boost install dir (in ~/.profile or ~/.bashrc)
 
 Restart terminal, or reload config with `source ~/.profile` (`source ~/.bashrc`)
 
+###Install log4cplus
+
+####Build from sources
+
+Can work with either 1.1.x or 1.2.0. Run the following commands in some "libs" directory to setup 1.2.0
+
+```
+sudo apt-get -y install autotools-dev automake
+wget -O log4cplus-1.2.0.tar.xz http://heanet.dl.sourceforge.net/project/log4cplus/log4cplus-stable/1.2.0/log4cplus-1.2.0.tar.xz
+tar xf log4cplus-1.2.0.tar.xz
+cd log4cplus-1.2.0
+./configure CXX="clang++" --disable-shared --enable-static --prefix=$PWD/build
+make -j$(nproc) && make install
+```
+####Set environment variable
+Set env pointing to the log4cplus install dir (in ~/.profile or ~/.bashrc)
+
+`export BOOST_HOME=~/libs/boost_1_61_0/build`
+
+Restart terminal, or reload config with `source ~/.profile` (`source ~/.bashrc`)
+
 ##Setup git hook
 
 Run `python infrastructure/tools/install_hooks.py`
@@ -63,17 +84,11 @@ sudo pip install cpplint
 
 In the project root call
 
-`./waf configure clean_release build_release clean_debug build_debug -v -j2`
+`./waf configure --logger=log4cplus clean_release build_release clean_debug build_debug -v -j2`
 
-GCC is used by defaul. This can be changed in the folling way.
+Clang is used by defaul. Fallback to GCC if Clang not found. To use GCC call
 
-`CXX=clang++ ./waf configure`
-
-Use '--init' flag during build to prepare for execution. E.g.
-
-`./waf build_debug --init`
-
-This will copy default config to the project root.
+`CXX=g++ ./waf configure`
 
 ###Build with sanitizers (clang)
 
@@ -87,7 +102,7 @@ Use the following option for configuration `--sanitize`. Applicable to debug bui
 Example
 
 ```
-CXX=clang++ ./waf configure --sanitize=asan
+./waf configure --logger=log4cplus --sanitize=asan
 ./waf build_debug -v
 ASAN_OPTIONS="detect_leaks=1" ./build/debug/testrunner
 ```
@@ -142,7 +157,3 @@ class Bar {
 };
 }  // namespace Foo
 ```
-
-###Configuration
-
-Config file is expected to be present in current working directory. Sample config can be found in `/infrastructure/config/logger.cfg`
