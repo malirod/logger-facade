@@ -39,11 +39,11 @@ script:
   - docker commit $(docker ps -l -q) travis-build
   - docker run travis-build build/debug/testrunner
   # GCC, build debug and release with log4cplus logger, run debug tests
-  #- docker run travis-build /bin/bash -c "./waf clean_debug clean_release"
-  #- docker commit $(docker ps -l -q) travis-build
-  #- docker run travis-build /bin/bash -c "CXX=g++ ./waf configure --init --logger=log4cplus build_debug build_release"
-  #- docker commit $(docker ps -l -q) travis-build
-  #- docker run travis-build build/debug/testrunner
+  - docker run travis-build /bin/bash -c "./waf clean_debug clean_release"
+  - docker commit $(docker ps -l -q) travis-build
+  - docker run travis-build /bin/bash -c "CXX=g++ ./waf configure --init --logger=log4cplus build_debug build_release"
+  - docker commit $(docker ps -l -q) travis-build
+  - docker run travis-build build/debug/testrunner
   # GCC, build debug and release without logger, run debug tests
   - docker run travis-build /bin/bash -c "./waf clean_debug clean_release"
   - docker commit $(docker ps -l -q) travis-build

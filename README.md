@@ -4,17 +4,13 @@
 Allows to switch between different loggers keeping the same interface. Supported log4cplus and Boost Log
 
 ##Platform
-
 Ubuntu 16.04: Clang 3.8, GCC 5.4
 
 C++11 Standard is used.
 
 ##Setup
-
 ###Install Boost
-
 ####Use pre-build Boost lib
-
 Use the following repository: https://github.com/malirod/boost-bin
 
 Use appropriate branch. Branch name containts info about used env and options to build Boost.
@@ -43,10 +39,22 @@ Set env pointing to the boost install dir (in ~/.profile or ~/.bashrc)
 Restart terminal, or reload config with `source ~/.profile` (`source ~/.bashrc`)
 
 ###Install log4cplus
-
 ####Build from sources
+Can work with either 1.1.x or 1.2.0.
 
-Can work with either 1.1.x or 1.2.0. Run the following commands in some "libs" directory to setup 1.2.0
+Run the following commands in some "libs" directory to setup latest master. This is requred to build on Ubuntu 16.04 with gcc 5.4. Other versions of log4cplus contains auto_ptr which are deprecated and prevent build.
+
+```
+git clone https://github.com/log4cplus/log4cplus.git
+cd log4cplus
+git submodule update --init --recursive
+./scripts/fix-timestamps.sh
+./configure CXX="clang++" --disable-shared --enable-static --prefix=$PWD/build
+make -j$(nproc) && make install
+```
+
+Run the following commands in some "libs" directory to setup 1.2.0
+
 
 ```
 sudo apt-get -y install autotools-dev automake
@@ -56,6 +64,7 @@ cd log4cplus-1.2.0
 ./configure CXX="clang++" --disable-shared --enable-static --prefix=$PWD/build
 make -j$(nproc) && make install
 ```
+
 ####Set environment variable
 Set env pointing to the log4cplus install dir (in ~/.profile or ~/.bashrc)
 
@@ -64,24 +73,20 @@ Set env pointing to the log4cplus install dir (in ~/.profile or ~/.bashrc)
 Restart terminal, or reload config with `source ~/.profile` (`source ~/.bashrc`)
 
 ##Setup git hook
-
 Run `python infrastructure/tools/install_hooks.py`
 
 This will allow to perform some code checks locally before posting changes to server.
 
 ##Install pylint - python checker
-
 `sudo apt-get install pylint`
 
 ##Install cpplint - c++ style checker
-
 ```
 sudo apt-get install python-pip
 sudo pip install cpplint
 ```
 
 ##Build
-
 In the project root call
 
 `./waf configure --logger=log4cplus clean_release build_release clean_debug build_debug -v -j2`
@@ -91,7 +96,6 @@ Clang is used by defaul. Fallback to GCC if Clang not found. To use GCC call
 `CXX=g++ ./waf configure`
 
 ###Build with sanitizers (clang)
-
 Use the following option for configuration `--sanitize`. Applicable to debug build only. Known values are:
 
 - `asan`: address
@@ -108,13 +112,11 @@ ASAN_OPTIONS="detect_leaks=1" ./build/debug/testrunner
 ```
 
 ##Run
-
 Run from project root. It's expected that config is located in the project root.
 
 `build/debug/testrunner`
 
 ##Basic usage
-
 ###Init logging and log with global logger
 
 ```
@@ -134,7 +136,6 @@ int main(int argc, char** argv) {
 }
 ```
 ###Class logger and traces
-
 ```
 namespace Foo {
 class Bar {
