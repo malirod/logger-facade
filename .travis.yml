@@ -16,37 +16,49 @@ before_install:
 script:
   # Common style check
   - docker run travis-build infrastructure/tools/checkstyle.sh $TRAVIS_COMMIT_RANGE
-  # Clang, build debug and release witn boost logger, run debug tests
-  - docker run travis-build /bin/bash -c "./waf configure --init --logger=boost build_debug build_release"
+  # Clang, build debug and release witn BOOST logger, run debug tests
+  - docker run travis-build /bin/bash -c "./waf configure --logger=boost build_debug build_release"
   - docker commit $(docker ps -l -q) travis-build
   - docker run travis-build build/debug/testrunner
-  # Clang, build debug and release with log4cplus logger, run debug tests
+  # Clang, build debug and release with LOG4CPLUS logger, run debug tests
   - docker run travis-build /bin/bash -c "./waf clean_debug clean_release"
   - docker commit $(docker ps -l -q) travis-build
-  - docker run travis-build /bin/bash -c "./waf configure --init --logger=log4cplus build_debug build_release"
+  - docker run travis-build /bin/bash -c "./waf configure --logger=log4cplus build_debug build_release"
+  - docker commit $(docker ps -l -q) travis-build
+  - docker run travis-build build/debug/testrunner
+  # Clang, build debug with BOOST SYNC logger, run tests
+  - docker run travis-build /bin/bash -c "./waf clean_debug"
+  - docker commit $(docker ps -l -q) travis-build
+  - docker run travis-build /bin/bash -c "CXXFLAGS=\"-DTEST_SYNC_LOGGING\" ./waf configure --logger=boost build_debug"
+  - docker commit $(docker ps -l -q) travis-build
+  - docker run travis-build build/debug/testrunner
+  # Clang, build debug with LOG4CPLUS SYNC logger, run tests
+  - docker run travis-build /bin/bash -c "./waf clean_debug"
+  - docker commit $(docker ps -l -q) travis-build
+  - docker run travis-build /bin/bash -c "CXXFLAGS=\"-DTEST_SYNC_LOGGING\" ./waf configure --logger=log4cplus build_debug"
   - docker commit $(docker ps -l -q) travis-build
   - docker run travis-build build/debug/testrunner
   # Clang, build debug and release without logger, run debug tests
   - docker run travis-build /bin/bash -c "./waf clean_debug clean_release"
   - docker commit $(docker ps -l -q) travis-build
-  - docker run travis-build /bin/bash -c "./waf configure --init build_debug  build_release"
+  - docker run travis-build /bin/bash -c "./waf configure build_debug  build_release"
   - docker commit $(docker ps -l -q) travis-build
   - docker run travis-build build/debug/testrunner
   # GCC, build debug and release with boost logger, run debug tests
   - docker run travis-build /bin/bash -c "./waf clean_debug clean_release"
   - docker commit $(docker ps -l -q) travis-build
-  - docker run travis-build /bin/bash -c "CXX=g++ ./waf configure --init --logger=boost build_debug build_release"
+  - docker run travis-build /bin/bash -c "CXX=g++ ./waf configure --logger=boost build_debug build_release"
   - docker commit $(docker ps -l -q) travis-build
   - docker run travis-build build/debug/testrunner
   # GCC, build debug and release with log4cplus logger, run debug tests
   #- docker run travis-build /bin/bash -c "./waf clean_debug clean_release"
   #- docker commit $(docker ps -l -q) travis-build
-  #- docker run travis-build /bin/bash -c "CXX=g++ ./waf configure --init --logger=log4cplus build_debug build_release"
+  #- docker run travis-build /bin/bash -c "CXX=g++ ./waf configure --logger=log4cplus build_debug build_release"
   #- docker commit $(docker ps -l -q) travis-build
   #- docker run travis-build build/debug/testrunner
   # GCC, build debug and release without logger, run debug tests
   - docker run travis-build /bin/bash -c "./waf clean_debug clean_release"
   - docker commit $(docker ps -l -q) travis-build
-  - docker run travis-build /bin/bash -c "CXX=g++ ./waf configure --init build_debug build_release"
+  - docker run travis-build /bin/bash -c "CXX=g++ ./waf configure build_debug build_release"
   - docker commit $(docker ps -l -q) travis-build
   - docker run travis-build build/debug/testrunner

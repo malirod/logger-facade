@@ -143,19 +143,18 @@ void IMPL_LOGGER_NAMESPACE_::LogManager::Shutdown() {
 #include <fstream>
 #include <vector>
 #include "log4cplus/configurator.h"
+// #include "log4cplus/helpers/loglog.h" // uncomment to enable internal logging
 
 namespace {
 
 void InitLogging(std::istream& log_config) {
   log4cplus::initialize();
 
-  // this will set def log level to DEBUG
-  log4cplus::BasicConfigurator::doConfigure();
-
-  log4cplus::Logger::getRoot().setLogLevel(log4cplus::INFO_LOG_LEVEL);
-
   log4cplus::PropertyConfigurator configurator(log_config);
   configurator.configure();
+
+  // Enable log4cplus internal logging
+  // log4cplus::helpers::LogLog::getLogLog()->setInternalDebugging(true);
 }
 
 }  // namespace
