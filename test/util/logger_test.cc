@@ -22,6 +22,8 @@ std::string ReplaceString(std::string subject,
 
 #if defined(USE_BOOST_LOGGER)
 
+#if !defined(TEST_SYNC_LOGGING)
+
 const char* kLogConfigTemplate =
     R"([Core]
 DisableLogging="false"
@@ -48,10 +50,42 @@ FileName="$FILE_NAME"
 ScanForFiles="Matching"
 )";
 
-#else
+#else  // TEST_SYNC_LOGGING
 
 const char* kLogConfigTemplate =
-    R"(# Define a file async appender named "ASYNCFILE"
+    R"([Core]
+DisableLogging="false"
+
+[Sinks.LogFile]
+Filter="%Severity% >= TRACE"
+
+Destination="TextFile"
+
+Asynchronous="false"
+
+AutoFlush="false"
+
+Format="%TimeStamp(format=\"%H:%M:%S.%f\")% [%Name%][%Severity%]:%Message%"
+
+# Target directory in which rotated files will be stored.
+# If not set, then rotation rules will not work as expected
+Target="./"
+
+# FileName pattern to use. %N is a counter for files.
+FileName="$FILE_NAME"
+
+# Matching used so that only files matching FileName pattern are deleted.
+ScanForFiles="Matching"
+)";
+
+#endif  // TEST_SYNC_LOGGING
+
+#else
+
+#if !defined(TEST_SYNC_LOGGING)
+
+const char* kLogConfigTemplate =
+    R"(
 log4cplus.appender.ASYNCFILE=log4cplus::AsyncAppender
 log4cplus.appender.ASYNCFILE.Appender=log4cplus::RollingFileAppender
 log4cplus.appender.ASYNCFILE.Appender.MaxBackupIndex=2
@@ -60,17 +94,24 @@ log4cplus.appender.ASYNCFILE.Appender.File=$FILE_NAME
 log4cplus.appender.ASYNCFILE.Appender.layout=log4cplus::PatternLayout
 log4cplus.appender.ASYNCFILE.Appender.layout.ConversionPattern=[%c][%5p]:%m%n
 
-#log4cplus.appender.ROLLFILE=log4cplus::RollingFileAppender
-#log4cplus.appender.ROLLFILE.MaxBackupIndex=2
-#log4cplus.appender.ROLLFILE.MaxFileSize=10MB
-#log4cplus.appender.ROLLFILE.File=$FILE_NAME
-#log4cplus.appender.ROLLFILE.layout=log4cplus::PatternLayout
-#log4cplus.appender.ROLLFILE.layout.ConversionPattern=[%c][%5p]:%m%n
-
-# Define the root logger
 log4cplus.rootLogger=TRACE, ASYNCFILE
-#log4cplus.rootLogger=TRACE, ROLLFILE
 )";
+
+#else  // TEST_SYNC_LOGGING
+
+const char* kLogConfigTemplate =
+    R"(
+log4cplus.appender.ROLLFILE=log4cplus::RollingFileAppender
+log4cplus.appender.ROLLFILE.MaxBackupIndex=2
+log4cplus.appender.ROLLFILE.MaxFileSize=10MB
+log4cplus.appender.ROLLFILE.File=$FILE_NAME
+log4cplus.appender.ROLLFILE.layout=log4cplus::PatternLayout
+log4cplus.appender.ROLLFILE.layout.ConversionPattern=[%c][%5p]:%m%n
+
+log4cplus.rootLogger=TRACE, ROLLFILE
+)";
+
+#endif  // TEST_SYNC_LOGGING
 
 #endif
 
@@ -84,8 +125,9 @@ std::string GetLogOutput() {
   std::ifstream ifs(kLogFileName);
   // assert is better, but can't assert in no-void functions
   EXPECT_TRUE(ifs.is_open());
-  return std::string(std::istreambuf_iterator<char>(ifs),
-                     std::istreambuf_iterator<char>());
+  auto result = std::string(std::istreambuf_iterator<char>(ifs),
+                            std::istreambuf_iterator<char>());
+  return result;
 }
 
 template <typename T>
@@ -231,12 +273,12 @@ TEST(TestLogger, UseLocalLogger) {
 
 TEST(TestLogger, WriteToLogInLoop) {
   const auto action = []() {
-    const auto kIterationCount = 11000;
+    const auto kIterationCount = 21000;
     for (auto i = 1; i <= kIterationCount; ++i) {
       LOG_TRACE("Logging from loop. Iteration #" << i);
     }
     const auto log_content = GetLogOutput();
-    TestContains(log_content, "Logging from loop. Iteration #11000");
+    TestContains(log_content, "Logging from loop. Iteration #21000");
   };
 
   InitLoggerAndRunTest(action);
