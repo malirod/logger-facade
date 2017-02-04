@@ -59,7 +59,7 @@ make -j$(nproc) && make install
 ####Set environment variable
 Set env pointing to the log4cplus install dir (in ~/.profile or ~/.bashrc)
 
-`export BOOST_HOME=~/libs/boost_1_61_0/build`
+`export LOG4CPLUS_HOME=~/libs/boost_1_61_0/build`
 
 Restart terminal, or reload config with `source ~/.profile` (`source ~/.bashrc`)
 
