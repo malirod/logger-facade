@@ -27,7 +27,7 @@ RUN tar -xzf build.tar.gz
 WORKDIR $HOME/libs
 RUN apt-get install -y autotools-dev automake wget
 RUN apt-get install autotools-dev automake
-RUN wget -O log4cplus-1.2.0.tar.xz http://heanet.dl.sourceforge.net/project/log4cplus/log4cplus-stable/1.2.0/log4cplus-1.2.0.tar.xz
+RUN wget -O log4cplus-1.2.0.tar.xz https://sourceforge.net/projects/log4cplus/files/log4cplus-stable/1.2.0/log4cplus-1.2.0.tar.xz
 RUN tar xf log4cplus-1.2.0.tar.xz
 WORKDIR $HOME/libs/log4cplus-1.2.0
 RUN ./configure CXX="clang++" --disable-shared --enable-static --prefix=$PWD/build
